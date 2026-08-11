@@ -670,6 +670,8 @@ async function hostCreateGame(name, avatar, expectedCount, roomCode, fakeSlamPhr
 
   NET.myPeerId = await waitForPeerOpen(peer);
   NET.mySeatId = NET.myPeerId;
+  state.mySeatId = NET.mySeatId;
+  state.roomCode = roomCode;
 
   NET.hostService = new HostService(
     expectedCount,
@@ -721,6 +723,8 @@ async function joinGame(roomCode, name, avatar, fakeSlamPhrase) {
 
   NET.myPeerId = await waitForPeerOpen(peer);
   NET.mySeatId = NET.myPeerId;
+  state.mySeatId = NET.mySeatId;
+  state.roomCode = roomCode;
 
   const conn = peer.connect(hostPeerId(roomCode), { reliable: true });
   NET.hostConn = conn;
@@ -766,6 +770,7 @@ function sendAction(msg) {
 
 function clientHandleMessage(msg) {
   switch (msg.t) {
+    case 'joined': onJoined(msg); break;
     case 'lobby': onLobby(msg); break;
     case 'hand': onHand(msg); break;
     case 'pass': onPassEvent(msg); break;
@@ -778,6 +783,12 @@ function clientHandleMessage(msg) {
     case 'error': showToast(msg.message); break;
     default: break;
   }
+}
+
+function onJoined(msg) {
+  if (!msg?.seatId) return;
+  NET.mySeatId = msg.seatId;
+  state.mySeatId = msg.seatId;
 }
 
 /* =========================================================================
@@ -985,9 +996,8 @@ function enterGame() {
   showHud();
   initScene();
   renderTable();
-  if (state.isAdmin) {
-    maybeShowAdminNameSetup();
-  }
+  if (state.isAdmin) maybeShowAdminNameSetup();
+  maybeShowWaiting();
 }
 
 /* =========================================================================
@@ -1000,6 +1010,8 @@ function onLobby(dto) {
   state.roundNumber = dto.roundNumber;
   state.expectedPlayerCount = dto.expectedPlayerCount;
   state.players = dto.players;
+  if (!state.mySeatId) state.mySeatId = NET.mySeatId;
+  if (!state.roomCode) state.roomCode = NET.roomCode;
   renderTopbar();
   renderTable();
   renderInviteRoster();
