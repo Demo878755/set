@@ -12,13 +12,13 @@
     --ink:#241C15; --slam:#C1443C; --shadow:rgba(10,7,4,0.45);
   }
   *{ box-sizing:border-box; }
-  html,body{ margin:0; padding:0; width:100%; height:100%; overflow:hidden; background:#0c0a08; font-family:'Inter',sans-serif; color:var(--paper); }
+  html,body{ margin:0; padding:0; width:100%; height:100%; overflow:hidden; background:#070605; font-family:'Inter',sans-serif; color:var(--paper); }
   #scene-canvas{ position:fixed; inset:0; display:block; }
   .hidden{ display:none !important; }
 
   .screen-backdrop{
     position:fixed; inset:0; z-index:40; display:flex; align-items:center; justify-content:center;
-    background:radial-gradient(ellipse at 50% 30%, #21160c 0%, #0c0a08 70%); padding:20px;
+    background:radial-gradient(ellipse at 50% 30%, #1c130a 0%, #070605 75%); padding:20px;
   }
   .card{
     width:min(480px,94vw); max-height:92vh; overflow:auto; background:var(--paper); color:var(--ink);
@@ -78,14 +78,14 @@
 
   /* HUD */
   #hud{ position:fixed; inset:0; z-index:20; pointer-events:none; display:flex; flex-direction:column; justify-content:space-between; }
-  #topbar{ pointer-events:auto; display:flex; align-items:center; justify-content:space-between; padding:14px 20px; background:linear-gradient(to bottom, rgba(12,10,8,0.85), transparent); }
-  .room-chip{ font-family:'IBM Plex Mono',monospace; font-size:12.5px; background:rgba(0,0,0,0.45); border:1px solid rgba(232,163,61,0.4); color:var(--brass); padding:6px 14px; border-radius:20px; }
+  #topbar{ pointer-events:auto; display:flex; align-items:center; justify-content:space-between; padding:14px 20px; background:linear-gradient(to bottom, rgba(7,6,5,0.9), transparent); }
+  .room-chip{ font-family:'IBM Plex Mono',monospace; font-size:12.5px; background:rgba(0,0,0,0.55); border:1px solid rgba(232,163,61,0.4); color:var(--brass); padding:6px 14px; border-radius:20px; }
   .status-text{ font-size:12.5px; color:#d8cdbb; font-weight:500; }
-  .icon-btn{ background:rgba(20,17,13,0.7); border:1px solid rgba(255,255,255,0.15); color:var(--paper); padding:8px 14px; border-radius:8px; font-size:12.5px; font-weight:600; cursor:pointer; }
+  .icon-btn{ background:rgba(20,17,13,0.75); border:1px solid rgba(255,255,255,0.15); color:var(--paper); padding:8px 14px; border-radius:8px; font-size:12.5px; font-weight:600; cursor:pointer; }
   .icon-btn:hover{ background:rgba(232,163,61,0.22); border-color:var(--brass); }
   .icon-btn.danger:hover{ background:rgba(193,68,60,0.28); border-color:var(--slam); }
 
-  #hand-tray{ pointer-events:auto; display:flex; flex-direction:column; align-items:center; gap:10px; padding:14px 16px 20px; background:linear-gradient(to top, rgba(12,10,8,0.9), transparent); }
+  #hand-tray{ pointer-events:auto; display:flex; flex-direction:column; align-items:center; gap:10px; padding:14px 16px 20px; background:linear-gradient(to top, rgba(7,6,5,0.95), transparent); }
   #hand-row{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
   .paper-card{
     width:76px; height:104px; background:var(--paper); border-radius:8px;
@@ -256,14 +256,14 @@
   <div class="card">
     <p class="brand" style="font-size:24px;" id="rr-title">Round complete</p>
     <div id="rr-rankings"></div>
-    <button class="btn btn-primary" id="btn-rr-close">Continue</button>
+    <button class="btn btn-primary" id="btn-rr-close">Continue to Next Round</button>
   </div>
 </div>
 
 <!-- ============ GAME OVER ============ -->
 <div id="game-over-modal" class="screen-backdrop hidden">
   <div class="card">
-    <p class="brand" style="font-size:24px;">Final scores</p>
+    <p class="brand" style="font-size:24px;">Final Scoreboard</p>
     <div class="winner-banner" id="go-winner-banner"></div>
     <div id="go-rankings"></div>
     <button class="btn btn-ghost" id="btn-new-game">Set up a new game</button>
@@ -359,7 +359,7 @@ function generateRoomCode() {
    ========================================================================= */
 class GameEngine {
   constructor(seats) {
-    this.seats = seats.map(s => ({ ...s, hand: [], totalScore: 0, roundsWon: 0 }));
+    this.seats = seats.map(s => ({ ...s, hand: [], totalScore: s.totalScore || 0, roundsWon: s.roundsWon || 0 }));
     this.status = 'LOBBY';
     this.dealerIndex = 0;
     this.roundNumber = 0;
@@ -468,7 +468,7 @@ class GameEngine {
       const rank = i + 1;
       const pts = Math.max(n - rank + 1, 1);
       const seat = this.seats.find(s => s.id === id);
-      seat.totalScore += pts;
+      seat.totalScore = (seat.totalScore || 0) + pts;
       return { seatId: id, name: seat.name, avatar: seat.avatar, rank, points: pts, totalAfter: seat.totalScore };
     });
     this.dealerIndex = this.seats.findIndex(s => s.id === this.reaction.winnerId);
@@ -573,6 +573,23 @@ const NET = {
       animateCardPass(msg.fromId, msg.toId);
     } else if (msg.t === 'slammed') {
       onSlammed(msg.result);
+    } else if (msg.t === 'reactionOrder') {
+      if (engine && engine.reaction) {
+        engine.reaction.order = msg.order;
+        updateRaceOrderDisplay();
+      }
+    } else if (msg.t === 'roundResult') {
+      if (engine) {
+        msg.seats.forEach(sSync => {
+          const s = engine.seats.find(x => x.id === sSync.id);
+          if (s) { s.totalScore = sSync.totalScore; s.roundsWon = sSync.roundsWon; }
+        });
+      }
+      showRoundResult(msg.rankings);
+    } else if (msg.t === 'gameOver') {
+      clearBotTimers();
+      if (engine) engine.status = 'CLOSED';
+      showGameOver(msg.ranked);
     } else if (msg.t === 'toast') {
       showToast(msg.msg);
     }
@@ -912,8 +929,11 @@ function applyGameStateSync(remoteState, myHand) {
   engine.firstLapComplete = remoteState.firstLapComplete;
   
   remoteState.seats.forEach((rs, i) => {
-    engine.seats[i].totalScore = rs.totalScore;
-    engine.seats[i].hand = (rs.id === NET.mySeatId && myHand) ? myHand : Array(rs.handCount).fill({ id: 'secret', label: '?' });
+    if (engine.seats[i]) {
+      engine.seats[i].totalScore = rs.totalScore;
+      engine.seats[i].roundsWon = rs.roundsWon;
+      engine.seats[i].hand = (rs.id === NET.mySeatId && myHand) ? myHand : Array(rs.handCount).fill({ id: 'secret', label: '?' });
+    }
   });
 
   renderTopbar();
@@ -980,6 +1000,15 @@ function resolveBotTurn(seat) {
 function handleOnlineAction(action, seatId, payload) {
   if (!NET.isHost) return;
   const current = engine.currentSeat();
+
+  if (action === 'react') {
+    engine.react(seatId);
+    NET.broadcast({ t: 'reactionOrder', order: engine.reaction.order });
+    updateRaceOrderDisplay();
+    maybeFinalizeRace();
+    return;
+  }
+
   if (current.id !== seatId) return;
 
   if (action === 'pass') {
@@ -1157,9 +1186,13 @@ function runReactionRace() {
     if (!engine.reaction) return;
     const myId = NET.mode === 'ONLINE' ? NET.mySeatId : engine.seats.find(s => !s.isBot && s.id !== winner.id && !engine.reaction.order.includes(s.id))?.id;
     if (myId) {
-      engine.react(myId);
-      updateRaceOrderDisplay();
-      maybeFinalizeRace();
+      if (NET.mode === 'ONLINE') {
+        NET.sendToHost('react', {});
+      } else {
+        engine.react(myId);
+        updateRaceOrderDisplay();
+        maybeFinalizeRace();
+      }
     }
   };
 
@@ -1190,21 +1223,35 @@ function finalizeRace() {
   if (raceFinalizing || !engine.reaction) return;
   raceFinalizing = true;
   clearTimeout(raceTimer);
+
+  if (NET.mode === 'ONLINE' && !NET.isHost) {
+    return;
+  }
+
   const rankings = engine.finalizeRound();
   showRoundResult(rankings);
+
+  if (NET.mode === 'ONLINE' && NET.isHost) {
+    NET.broadcast({
+      t: 'roundResult',
+      rankings: rankings,
+      seats: engine.seats.map(s => ({ id: s.id, totalScore: s.totalScore, roundsWon: s.roundsWon }))
+    });
+  }
 }
 
 function showRoundResult(rankings) {
   restoreCamera();
+  renderTable();
   const list = $('rr-rankings');
   list.innerHTML = '';
   rankings.forEach((r) => {
     const row = document.createElement('div');
     row.className = 'rank-row';
-    row.innerHTML = `<span class="rank-pos">#${r.rank}</span><span class="rank-name">${AVATAR_EMOJI[r.avatar] || ''} ${escapeHtml(r.name)}</span><span class="rank-pts">+${r.points}</span>`;
+    row.innerHTML = `<span class="rank-pos">#${r.rank}</span><span class="rank-name">${AVATAR_EMOJI[r.avatar] || ''} ${escapeHtml(r.name)}</span><span class="rank-pts">+${r.points} pts <small style="color:#8a7d6d; font-weight:normal;">(Total: ${r.totalAfter} pts)</small></span>`;
     list.appendChild(row);
   });
-  $('rr-title').textContent = `Round ${engine.roundNumber} complete`;
+  $('rr-title').textContent = `Round ${engine.roundNumber} Complete`;
   showScreen('round-result-modal');
 }
 
@@ -1226,10 +1273,14 @@ $('btn-close-confirm').onclick = () => {
   clearBotTimers();
   const ranked = engine.closeGame();
   showGameOver(ranked);
+  if (NET.mode === 'ONLINE' && NET.isHost) {
+    NET.broadcast({ t: 'gameOver', ranked });
+  }
 };
 $('btn-new-game').onclick = () => location.reload();
 
 function showGameOver(ranked) {
+  renderTable();
   const list = $('go-rankings');
   list.innerHTML = '';
   ranked.forEach((p, i) => {
@@ -1238,7 +1289,7 @@ function showGameOver(ranked) {
     row.innerHTML = `<span class="rank-pos">#${i + 1}</span><span class="rank-name">${AVATAR_EMOJI[p.avatar] || ''} ${escapeHtml(p.name)}</span><span class="rank-pts">${p.totalScore} pts</span>`;
     list.appendChild(row);
   });
-  $('go-winner-banner').textContent = ranked.length ? `🏆 ${ranked[0].name} wins!` : 'Game over';
+  $('go-winner-banner').textContent = ranked.length ? `🏆 ${ranked[0].name} wins with ${ranked[0].totalScore} pts!` : 'Game over';
   showScreen('game-over-modal');
 }
 
@@ -1248,9 +1299,10 @@ function renderTopbar() {
 }
 
 /* =========================================================================
-   THREE.JS 3D TABLE SCENE
+   REAL-TIME 3D TABLE & LIGHTING SCENE
    ========================================================================= */
 let renderer, scene, camera, controls;
+let lampSpotLight, lampBulbLight;
 const seatsGroup = new THREE.Group();
 const avatarsBySeat = new Map();
 const flyingCards = [];
@@ -1262,6 +1314,26 @@ const DEFAULT_CAM_POS = new THREE.Vector3(0, 7.2, 9.4);
 const DEFAULT_CAM_TARGET = new THREE.Vector3(0, 0.4, 0);
 const TOPDOWN_CAM_POS = new THREE.Vector3(0.01, 12.5, 0.01);
 const TOPDOWN_CAM_TARGET = new THREE.Vector3(0, 0.4, 0);
+
+function createFeltBumpTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 256; canvas.height = 256;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#808080';
+  ctx.fillRect(0, 0, 256, 256);
+  const imgData = ctx.getImageData(0, 0, 256, 256);
+  const data = imgData.data;
+  for (let i = 0; i < data.length; i += 4) {
+    const val = 128 + Math.floor((Math.random() - 0.5) * 32);
+    data[i] = val; data[i+1] = val; data[i+2] = val;
+  }
+  ctx.putImageData(imgData, 0, 0);
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(16, 16);
+  return tex;
+}
 
 class OrbitLite {
   constructor(camera, domElement) {
@@ -1318,10 +1390,12 @@ function initScene() {
   renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
   scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x0c0a08);
-  scene.fog = new THREE.Fog(0x0c0a08, 14, 26);
+  scene.background = new THREE.Color(0x070605);
+  scene.fog = new THREE.FogExp2(0x070605, 0.04);
 
   camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 100);
   camera.position.copy(DEFAULT_CAM_POS);
@@ -1332,7 +1406,7 @@ function initScene() {
   controls.syncFromCamera();
   controls.update();
 
-  scene.add(new THREE.HemisphereLight(0x8a7d6d, 0x1a1410, 0.55));
+  scene.add(new THREE.HemisphereLight(0x3a3024, 0x0a0806, 0.35));
 
   buildTable();
   buildLamp();
@@ -1349,23 +1423,40 @@ function onResize() {
 }
 
 function buildTable() {
+  const feltTex = createFeltBumpTexture();
   const felt = new THREE.Mesh(
-    new THREE.CylinderGeometry(4.6, 4.6, 0.35, 48),
-    new THREE.MeshStandardMaterial({ color: 0x1f4b3f, roughness: 0.85 })
+    new THREE.CylinderGeometry(4.6, 4.6, 0.35, 64),
+    new THREE.MeshStandardMaterial({
+      color: 0x0e3627,
+      roughness: 0.95,
+      bumpMap: feltTex,
+      bumpScale: 0.03
+    })
   );
   felt.position.y = 0.18;
+  felt.receiveShadow = true;
   scene.add(felt);
 
   const rim = new THREE.Mesh(
-    new THREE.CylinderGeometry(4.85, 4.9, 0.5, 48),
-    new THREE.MeshStandardMaterial({ color: 0x6b4226, roughness: 0.6 })
+    new THREE.CylinderGeometry(4.85, 4.9, 0.5, 64),
+    new THREE.MeshStandardMaterial({
+      color: 0x2b1509,
+      roughness: 0.38,
+      metalness: 0.1
+    })
   );
   rim.position.y = 0.02;
+  rim.castShadow = true;
+  rim.receiveShadow = true;
   scene.add(rim);
 
   const brassTrim = new THREE.Mesh(
-    new THREE.TorusGeometry(4.62, 0.03, 8, 64),
-    new THREE.MeshStandardMaterial({ color: 0xe8a33d, metalness: 0.6, roughness: 0.35 })
+    new THREE.TorusGeometry(4.62, 0.03, 12, 64),
+    new THREE.MeshStandardMaterial({
+      color: 0xd49a37,
+      metalness: 0.85,
+      roughness: 0.22
+    })
   );
   brassTrim.rotation.x = Math.PI / 2;
   brassTrim.position.y = 0.37;
@@ -1373,29 +1464,38 @@ function buildTable() {
 
   const floor = new THREE.Mesh(
     new THREE.CircleGeometry(30, 32),
-    new THREE.MeshStandardMaterial({ color: 0x0f0c09, roughness: 1 })
+    new THREE.MeshStandardMaterial({ color: 0x090705, roughness: 1 })
   );
   floor.rotation.x = -Math.PI / 2;
   floor.position.y = -0.02;
+  floor.receiveShadow = true;
   scene.add(floor);
 }
 
 function buildLamp() {
   const shade = new THREE.Mesh(
     new THREE.ConeGeometry(1.1, 0.9, 24, 1, true),
-    new THREE.MeshStandardMaterial({ color: 0x2a2018, side: THREE.DoubleSide, roughness: 0.7 })
+    new THREE.MeshStandardMaterial({ color: 0x18130f, side: THREE.DoubleSide, roughness: 0.8, metalness: 0.2 })
   );
   shade.position.y = 5.6;
   scene.add(shade);
 
-  const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.18, 12, 12), new THREE.MeshBasicMaterial({ color: 0xffdca0 }));
+  const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.18, 12, 12), new THREE.MeshBasicMaterial({ color: 0xffe2b3 }));
   bulb.position.y = 5.15;
   scene.add(bulb);
 
-  const lampLight = new THREE.SpotLight(0xe8a33d, 90, 16, Math.PI / 4.2, 0.5, 1.4);
-  lampLight.position.set(0, 5.6, 0);
-  lampLight.target.position.set(0, 0, 0);
-  scene.add(lampLight, lampLight.target);
+  lampSpotLight = new THREE.SpotLight(0xffdfa9, 14, 18, Math.PI / 4, 0.55, 1.5);
+  lampSpotLight.position.set(0, 5.6, 0);
+  lampSpotLight.target.position.set(0, 0, 0);
+  lampSpotLight.castShadow = true;
+  lampSpotLight.shadow.mapSize.width = 1024;
+  lampSpotLight.shadow.mapSize.height = 1024;
+  lampSpotLight.shadow.bias = -0.001;
+  scene.add(lampSpotLight, lampSpotLight.target);
+
+  lampBulbLight = new THREE.PointLight(0xffa840, 2.2, 10);
+  lampBulbLight.position.set(0, 5.0, 0);
+  scene.add(lampBulbLight);
 }
 
 const AVATAR_CONFIG = {
@@ -1418,10 +1518,12 @@ function buildAnimal(type) {
   const body = new THREE.Mesh(new THREE.SphereGeometry(0.4, 14, 10), new THREE.MeshStandardMaterial({ color: cfg.body, roughness: 0.75 }));
   body.scale.set(1, 0.9, 0.85);
   body.position.y = 0.42;
+  body.castShadow = true;
   group.add(body);
 
   const head = new THREE.Mesh(new THREE.SphereGeometry(0.3, 14, 10), new THREE.MeshStandardMaterial({ color: cfg.head, roughness: 0.75 }));
   head.position.y = 0.98;
+  head.castShadow = true;
   group.add(head);
 
   const earGeo = cfg.ear === 'tall' ? new THREE.CylinderGeometry(0.06, 0.06, 0.42, 8)
@@ -1432,6 +1534,7 @@ function buildAnimal(type) {
   [-0.18, 0.18].forEach((x) => {
     const ear = new THREE.Mesh(earGeo, earMat);
     ear.position.set(x, cfg.ear === 'tall' ? 1.34 : 1.2, -0.05);
+    ear.castShadow = true;
     group.add(ear);
   });
 
@@ -1484,7 +1587,7 @@ function makeNameplateTexture(name, avatar, score, isDealer) {
   ctx.fillText(`${AVATAR_EMOJI[avatar] || ''} ${name}`, 16, 34, 268);
   ctx.fillStyle = '#c1443c';
   ctx.font = '600 22px "IBM Plex Mono", monospace';
-  ctx.fillText(`${score} pts`, 16, 64);
+  ctx.fillText(`${score || 0} pts`, 16, 64);
   return new THREE.CanvasTexture(canvas);
 }
 
@@ -1535,6 +1638,8 @@ function renderTable() {
       );
       card.position.set(0, 0.42 + c * 0.022, 0.55);
       card.rotation.y = (Math.random() - 0.5) * 0.15;
+      card.castShadow = true;
+      card.receiveShadow = true;
       entry.stack.add(card);
     }
   });
@@ -1548,6 +1653,7 @@ function animateCardPass(fromId, toId) {
     new THREE.BoxGeometry(0.42, 0.02, 0.58),
     new THREE.MeshStandardMaterial({ color: 0xf3eee1, roughness: 0.9 })
   );
+  card.castShadow = true;
   const start = from.group.position.clone().setY(0.55);
   const end = to.group.position.clone().setY(0.55);
   card.position.copy(start);
@@ -1614,6 +1720,11 @@ function restoreCamera() {
 
 function animate() {
   const t = performance.now();
+
+  // Dynamic real-time lamp flicker / breathing:
+  if (lampSpotLight) {
+    lampSpotLight.intensity = 14.0 + Math.sin(t * 0.002) * 0.4 + (Math.random() - 0.5) * 0.15;
+  }
 
   avatarsBySeat.forEach((entry) => {
     entry.group.children[0].position.y = 0.02 * Math.sin(t * 0.0018 + entry.bobPhase);
