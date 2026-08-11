@@ -80,7 +80,7 @@
 <div id="landing-screen" class="screen-backdrop">
   <div class="card">
     <p class="brand">SET'Da</p>
-    <p class="brand-sub">Real cross-device multiplayer with live voice chat — no server involved, ever. Your device (if hosting) is the table.</p>
+    <p class="brand-sub">Real cross-device multiplayer — no server involved, ever. Your device (if hosting) is the table.</p>
     <p class="brand-sub" style="background:#fff3de; padding:8px 10px; border-radius:8px; color:#8a5a13;">⚠️ Open this file directly in your browser (not inside a chat's built-in preview) — sandboxed previews block the connection this needs.</p>
 
     <div class="mode-tabs">
@@ -221,11 +221,8 @@
     <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
       <div class="room-chip" id="room-chip">— — — — — —</div>
       <div class="status-text" id="status-text"></div>
-      <div class="status-text" id="voice-roster-text"></div>
     </div>
     <div style="display:flex; gap:8px;">
-      <button class="icon-btn hidden" id="btn-voice-mute">🔇 Mute</button>
-      <button class="icon-btn" id="btn-voice-toggle">🎤 Join voice</button>
       <button class="icon-btn hidden danger" id="btn-close-game">Close game</button>
     </div>
   </div>
@@ -241,7 +238,6 @@
 </div>
 
 <div id="toast"></div>
-<div id="voice-audio-container" style="display:none;"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.2/peerjs.min.js"></script>
@@ -688,7 +684,6 @@ async function hostCreateGame(name, avatar, expectedCount, roomCode, fakeSlamPhr
     conn.on('data', (msg) => hostHandleIncoming(conn, msg));
     conn.on('close', () => { NET.connsBySeat.delete(conn.peer); });
   });
-  peer.on('call', (call) => { call.answer(voice.localStream); wireUpVoiceCall(call, call.peer); });
   peer.on('error', (err) => { if (err.type !== 'peer-unavailable') showToast('Connection issue: ' + err.type); });
 }
 
@@ -739,7 +734,6 @@ async function joinGame(roomCode, name, avatar, fakeSlamPhrase) {
   conn.on('close', () => showToast('Lost connection to the host.'));
   conn.send({ t: 'join', name, avatar, fakeSlamPhrase });
 
-  peer.on('call', (call) => { call.answer(voice.localStream); wireUpVoiceCall(call, call.peer); });
 }
 
 /** Uniform action-sending entry point the UI calls -- identical whether I'm the host or a client. */
@@ -791,82 +785,8 @@ function onJoined(msg) {
   state.mySeatId = msg.seatId;
 }
 
-/* =========================================================================
-   VOICE CHAT -- full mesh, real WebRTC audio, separate from the game-state
-   connections above. Every participant connects directly to every other
-   currently-known participant (from the lobby roster's seatId, which IS
-   each player's real PeerJS peer ID) purely for audio.
-   ========================================================================= */
-const voice = { active: false, localStream: null, calls: new Map() };
-
-$('btn-voice-toggle') && ($('btn-voice-toggle').onclick = () => { voice.active ? leaveVoice() : joinVoice(); });
-$('btn-voice-mute') && ($('btn-voice-mute').onclick = () => {
-  const track = voice.localStream?.getAudioTracks()[0];
-  if (!track) return;
-  track.enabled = !track.enabled;
-  $('btn-voice-mute').textContent = track.enabled ? '🔇 Mute' : '🔊 Unmute';
-});
-
-async function joinVoice() {
-  try {
-    voice.localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-  } catch {
-    showToast("Couldn't access your microphone — check your browser's permission for this page.");
-    return;
-  }
-  voice.active = true;
-  $('btn-voice-toggle').textContent = '🎤 Leave voice';
-  $('btn-voice-mute').classList.remove('hidden');
-  $('btn-voice-mute').textContent = '🔇 Mute';
-  state.players.filter((p) => p.seatId !== NET.mySeatId).forEach((p) => connectVoiceTo(p.seatId));
-}
-
-function leaveVoice() {
-  voice.active = false;
-  $('btn-voice-toggle').textContent = '🎤 Join voice';
-  $('btn-voice-mute').classList.add('hidden');
-  [...voice.calls.keys()].forEach(teardownVoiceCall);
-  if (voice.localStream) { voice.localStream.getTracks().forEach((t) => t.stop()); voice.localStream = null; }
-  renderVoiceRosterText();
-}
-
-function connectVoiceTo(seatId) {
-  if (!voice.active || voice.calls.has(seatId) || !NET.peer) return;
-  const call = NET.peer.call(seatId, voice.localStream);
-  if (call) wireUpVoiceCall(call, seatId);
-}
-
-function wireUpVoiceCall(call, seatId) {
-  voice.calls.set(seatId, call);
-  call.on('stream', (remoteStream) => {
-    let el = document.getElementById('voice-audio-' + seatId);
-    if (!el) {
-      el = document.createElement('audio');
-      el.id = 'voice-audio-' + seatId;
-      el.autoplay = true;
-      $('voice-audio-container').appendChild(el);
-    }
-    el.srcObject = remoteStream;
-    renderVoiceRosterText();
-  });
-  call.on('close', () => { voice.calls.delete(seatId); renderVoiceRosterText(); });
-  call.on('error', () => { voice.calls.delete(seatId); renderVoiceRosterText(); });
-}
-
-function teardownVoiceCall(seatId) {
-  const call = voice.calls.get(seatId);
-  if (call) { call.close(); voice.calls.delete(seatId); }
-  const el = document.getElementById('voice-audio-' + seatId);
-  if (el) el.remove();
-}
-
-function renderVoiceRosterText() {
-  if (!voice.active) { $('voice-roster-text').textContent = ''; return; }
-  const names = [...voice.calls.keys()]
-    .map((id) => state.players.find((p) => p.seatId === id)?.name)
-    .filter(Boolean);
-  $('voice-roster-text').textContent = names.length ? `🎤 ${names.join(', ')}` : '🎤 (waiting for others)';
-}
+/* Voice chat removed by request. */
+function renderVoiceRosterText() {}
 
 /* =========================================================================
    LANDING SCREEN
@@ -981,7 +901,7 @@ function renderInviteRoster() {
 /* =========================================================================
    SCREEN MANAGEMENT
    ========================================================================= */
-const SCREEN_IDS = ['landing-screen', 'invite-screen', 'name-setup-screen', 'waiting-screen', 'round-result-screen', 'game-over-screen', 'fakeslam-offer-screen', 'fakeslam-prompt-screen', 'fakeslam-reveal-screen'];
+const SCREEN_IDS = ['landing-screen', 'invite-screen', 'waiting-screen', 'round-result-screen', 'game-over-screen', 'fakeslam-offer-screen', 'fakeslam-prompt-screen', 'fakeslam-reveal-screen'];
 function hideAllScreens() { SCREEN_IDS.forEach((id) => $(id).classList.add('hidden')); $('hand-tray').classList.add('hidden'); }
 function showScreen(id) { hideAllScreens(); $(id).classList.remove('hidden'); }
 function showHud() { $('hud').classList.remove('hidden'); }
@@ -995,15 +915,16 @@ function showToast(msg) {
 function enterGame() {
   showHud();
   initScene();
+  if (!sceneReady) initScene();
   renderTable();
-  if (state.isAdmin) maybeShowAdminNameSetup();
+  if (state.isAdmin) maybeAutoPrepareRound();
   maybeShowWaiting();
 }
 
 /* =========================================================================
    INBOUND MESSAGE HANDLERS (uniform for host's own UI and every remote client)
    ========================================================================= */
-let nameSetupShown = false;
+let autoNamesSubmitted = false;
 
 function onLobby(dto) {
   state.status = dto.status;
@@ -1012,10 +933,11 @@ function onLobby(dto) {
   state.players = dto.players;
   if (!state.mySeatId) state.mySeatId = NET.mySeatId;
   if (!state.roomCode) state.roomCode = NET.roomCode;
+  if (!sceneReady) initScene();
   renderTopbar();
   renderTable();
   renderInviteRoster();
-  if (state.isAdmin) maybeShowAdminNameSetup();
+  if (state.isAdmin) maybeAutoPrepareRound();
   maybeShowWaiting();
 }
 
@@ -1055,7 +977,7 @@ function onRoundResult(dto) {
   $('rr-title').textContent = `Round ${dto.roundNumber} complete`;
   showScreen('round-result-screen');
 }
-$('btn-rr-close').onclick = () => { hideAllScreens(); showHud(); if (state.isAdmin) maybeShowAdminNameSetup(); maybeShowWaiting(); };
+$('btn-rr-close').onclick = () => { hideAllScreens(); showHud(); if (state.isAdmin) maybeAutoPrepareRound(); maybeShowWaiting(); };
 
 function onCloseRequested() {
   if (confirm("The host wants to end the game and show final scores. Accept?")) {
@@ -1081,30 +1003,31 @@ function onGameOver(dto) {
 }
 
 /* =========================================================================
-   ADMIN NAME SETUP
+   HOST AUTO-SETUP
    ========================================================================= */
-function maybeShowAdminNameSetup() {
-  if (state.status !== 'LOBBY') { nameSetupShown = false; return; }
-  if (state.players.length < state.expectedPlayerCount) return; // wait until everyone's in
-  if (nameSetupShown) return;
-  nameSetupShown = true;
-  const list = $('name-setup-list');
-  list.innerHTML = '';
-  state.players.forEach((p, i) => {
-    const row = document.createElement('div');
-    row.innerHTML = `<div class="field-label" style="margin:6px 0 4px;">${AVATAR_EMOJI[p.avatar] || ''} ${escapeHtml(p.name)}</div>
-      <input type="text" data-idx="${i}" maxlength="24" placeholder="e.g. Apple" />`;
-    list.appendChild(row);
+function buildAutoLabelsFromPlayers(players) {
+  const seen = new Map();
+  return players.map((p, i) => {
+    const base = (p.name || `Player ${i + 1}`).trim().slice(0, 24) || `Player ${i + 1}`;
+    const key = base.toLowerCase();
+    const n = (seen.get(key) || 0) + 1;
+    seen.set(key, n);
+    return n === 1 ? base : `${base} ${n}`;
   });
-  showScreen('name-setup-screen');
 }
-$('btn-save-names').onclick = () => {
-  const inputs = [...document.querySelectorAll('#name-setup-list input')];
-  const names = inputs.map((i) => i.value.trim());
-  if (names.some((n) => !n)) { $('name-setup-err').textContent = 'Every player needs a name.'; return; }
+
+function maybeAutoPrepareRound() {
+  if (!state.isAdmin) return;
+  if (state.status !== 'LOBBY') { autoNamesSubmitted = false; return; }
+  if (state.players.length < state.expectedPlayerCount) return;
+  if (autoNamesSubmitted) return;
+  autoNamesSubmitted = true;
+  const names = buildAutoLabelsFromPlayers(state.players);
   sendAction({ t: 'setNames', names });
-  hideAllScreens(); showHud();
-};
+  hideAllScreens();
+  showHud();
+  showToast('All players joined. Host can now jolt & deal.');
+}
 
 /* =========================================================================
    WAITING SCREEN (shown to non-active players between actions)
@@ -1113,7 +1036,7 @@ function maybeShowWaiting() {
   if (state.status === 'LOBBY' && !state.isAdmin) {
     $('waiting-text').textContent = state.players.length < state.expectedPlayerCount
       ? 'Waiting for more players to join…'
-      : 'The host is naming the sets…';
+      : 'All players are in. Waiting for host to start the round…';
     $('waiting-roster').innerHTML = state.players.map((p) => `${AVATAR_EMOJI[p.avatar] || ''} ${escapeHtml(p.name)}`).join(' &nbsp; ');
     showScreen('waiting-screen');
     return;
@@ -1584,7 +1507,7 @@ function roundRect(ctx, x, y, w, h, r) {
   ctx.closePath();
 }
 
-function makeNameplateTexture(name, avatar, score, isDealer, inVoice) {
+function makeNameplateTexture(name, avatar, score, isDealer) {
   const canvas = document.createElement('canvas');
   canvas.width = 300; canvas.height = 84;
   const ctx = canvas.getContext('2d');
@@ -1601,10 +1524,6 @@ function makeNameplateTexture(name, avatar, score, isDealer, inVoice) {
   ctx.fillStyle = '#c1443c';
   ctx.font = '600 22px "IBM Plex Mono", monospace';
   ctx.fillText(`${score} pts`, 16, 64);
-  if (inVoice) {
-    ctx.font = '28px Inter, sans-serif';
-    ctx.fillText('\u{1F3A4}', 258, 34);
-  }
   return new THREE.CanvasTexture(canvas);
 }
 
@@ -1650,8 +1569,7 @@ function renderTable() {
       entry.group.lookAt(0, 0, 0);
     }
 
-    const inVoice = p.seatId === NET.mySeatId ? voice.active : voice.calls.has(p.seatId);
-    entry.sprite.material.map = makeNameplateTexture(p.name, p.avatar, p.totalScore, p.isDealer, inVoice);
+    entry.sprite.material.map = makeNameplateTexture(p.name, p.avatar, p.totalScore, p.isDealer);
     entry.sprite.material.needsUpdate = true;
 
     while (entry.stack.children.length) entry.stack.remove(entry.stack.children[0]);
