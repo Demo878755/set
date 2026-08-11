@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>SET'Da</title>
+<title>SET'Da — Play with Friends</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
@@ -25,13 +25,15 @@
     border-radius:14px; padding:28px 26px 24px; box-shadow:0 30px 80px var(--shadow); border:1px solid rgba(0,0,0,0.08);
   }
   .brand{ font-family:'Fraunces',serif; font-weight:700; font-size:32px; letter-spacing:-0.01em; margin:0 0 2px; }
-  .brand-sub{ font-size:13px; color:#6b6055; margin:0 0 20px; }
+  .brand-sub{ font-size:13px; color:#6b6055; margin:0 0 18px; line-height:1.45; }
   .field-label{ font-size:12px; text-transform:uppercase; letter-spacing:0.08em; color:#8a7d6d; font-weight:600; margin:16px 0 6px; }
+  
   input[type=text],select{
     width:100%; padding:10px 12px; border-radius:8px; border:1.5px solid #ddd3c2;
     background:#fffdf9; font-family:'Inter',sans-serif; font-size:14.5px; color:var(--ink);
   }
   input[type=text]:focus,select:focus{ outline:none; border-color:var(--brass); }
+  
   .btn{
     display:block; width:100%; text-align:center; padding:13px; border-radius:9px; border:none;
     font-weight:700; font-size:14.5px; letter-spacing:0.01em; cursor:pointer; margin-top:16px;
@@ -44,59 +46,67 @@
   .btn-ghost{ background:transparent; color:var(--ink); border:1.5px solid #ddd3c2; }
   .err-line{ color:var(--slam); font-size:12.5px; margin-top:8px; min-height:14px; }
 
+  /* Mode selection tabs */
+  .mode-tabs{ display:flex; gap:6px; background:#e6dcc9; padding:4px; border-radius:10px; margin-bottom:18px; }
+  .mode-tab{ flex:1; text-align:center; padding:9px 6px; border-radius:7px; font-weight:700; font-size:13px; color:#7a6d5d; cursor:pointer; transition:all .15s ease; }
+  .mode-tab.active{ background:var(--paper); color:var(--ink); box-shadow:0 2px 6px rgba(0,0,0,0.1); }
+
+  .avatar-pick{ display:flex; gap:5px; flex-wrap:wrap; margin-bottom:12px; }
+  .avatar-pick span{
+    width:32px; height:32px; border-radius:8px; border:2px solid #e6dcc9; display:flex;
+    align-items:center; justify-content:center; font-size:16px; cursor:pointer; background:#fffdf9;
+  }
+  .avatar-pick span.sel{ border-color:var(--brass); background:#fff3de; transform:scale(1.08); }
+
+  .room-code-box{
+    font-family:'IBM Plex Mono',monospace; font-size:28px; font-weight:700; letter-spacing:0.18em;
+    background:#fff3de; border:2px dashed var(--brass); border-radius:10px; color:#8a5a13;
+    text-align:center; padding:12px; margin:10px 0; user-select:all;
+  }
+  .share-row{ display:flex; gap:8px; margin-top:8px; }
+  .share-btn{ flex:1; padding:9px; border-radius:8px; border:1px solid #ddd3c2; background:#fffdf9; font-weight:600; font-size:12.5px; cursor:pointer; }
+  .share-btn:hover{ background:#f5eedf; }
+
+  .roster-list{ display:flex; flex-direction:column; gap:8px; margin:14px 0; max-height:220px; overflow-y:auto; }
+  .roster-item{ display:flex; align-items:center; justify-content:space-between; background:#fffdf9; padding:8px 12px; border-radius:8px; border:1px solid #eee3d0; font-size:14px; font-weight:600; }
+  .roster-tag{ font-size:11px; text-transform:uppercase; font-family:'IBM Plex Mono',monospace; background:#e6dcc9; color:#6b6055; padding:2px 6px; border-radius:4px; }
+
   .seat-row{ display:flex; flex-direction:column; gap:8px; padding:12px 0; border-bottom:1px solid #eee3d0; }
   .seat-row:last-child{ border-bottom:none; }
   .seat-row-header{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
-  .avatar-pick{ display:flex; gap:4px; flex-wrap:wrap; }
-  .avatar-pick span{
-    width:27px; height:27px; border-radius:8px; border:2px solid #e6dcc9; display:flex;
-    align-items:center; justify-content:center; font-size:14px; cursor:pointer; background:#fffdf9;
-  }
-  .avatar-pick span.sel{ border-color:var(--brass); background:#fff3de; }
-  .seat-row input[type=text]{ width:100%; }
-  .mode-toggle{ display:inline-flex; border-radius:7px; overflow:hidden; border:1.5px solid #ddd3c2; flex-shrink:0; }
-  .mode-toggle div{ padding:8px 14px; font-size:11.5px; font-weight:700; cursor:pointer; color:#8a7d6d; }
-  .mode-toggle div.active{ background:var(--felt); color:var(--paper); }
   .seat-remove{ cursor:pointer; color:#b0a494; font-size:20px; padding:0 4px; flex-shrink:0; line-height:1; }
 
-  /* ---- HUD ---- */
+  /* HUD */
   #hud{ position:fixed; inset:0; z-index:20; pointer-events:none; display:flex; flex-direction:column; justify-content:space-between; }
-  #topbar{ pointer-events:auto; display:flex; align-items:center; justify-content:space-between; padding:14px 20px; background:linear-gradient(to bottom, rgba(12,10,8,0.75), transparent); }
-  .room-chip{ font-family:'IBM Plex Mono',monospace; font-size:12.5px; background:rgba(0,0,0,0.35); border:1px solid rgba(232,163,61,0.4); color:var(--brass); padding:6px 12px; border-radius:20px; }
+  #topbar{ pointer-events:auto; display:flex; align-items:center; justify-content:space-between; padding:14px 20px; background:linear-gradient(to bottom, rgba(12,10,8,0.85), transparent); }
+  .room-chip{ font-family:'IBM Plex Mono',monospace; font-size:12.5px; background:rgba(0,0,0,0.45); border:1px solid rgba(232,163,61,0.4); color:var(--brass); padding:6px 14px; border-radius:20px; }
   .status-text{ font-size:12.5px; color:#d8cdbb; font-weight:500; }
-  .icon-btn{ background:rgba(20,17,13,0.65); border:1px solid rgba(255,255,255,0.12); color:var(--paper); padding:8px 14px; border-radius:8px; font-size:12.5px; font-weight:600; cursor:pointer; }
-  .icon-btn:hover{ background:rgba(232,163,61,0.18); border-color:var(--brass); }
-  .icon-btn.danger:hover{ background:rgba(193,68,60,0.22); border-color:var(--slam); }
+  .icon-btn{ background:rgba(20,17,13,0.7); border:1px solid rgba(255,255,255,0.15); color:var(--paper); padding:8px 14px; border-radius:8px; font-size:12.5px; font-weight:600; cursor:pointer; }
+  .icon-btn:hover{ background:rgba(232,163,61,0.22); border-color:var(--brass); }
+  .icon-btn.danger:hover{ background:rgba(193,68,60,0.28); border-color:var(--slam); }
 
-  #hand-tray{ pointer-events:auto; display:flex; flex-direction:column; align-items:center; gap:10px; padding:14px 16px 20px; background:linear-gradient(to top, rgba(12,10,8,0.85), transparent); }
+  #hand-tray{ pointer-events:auto; display:flex; flex-direction:column; align-items:center; gap:10px; padding:14px 16px 20px; background:linear-gradient(to top, rgba(12,10,8,0.9), transparent); }
   #hand-row{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
   .paper-card{
-    width:74px; height:100px; background:var(--paper); border-radius:8px;
+    width:76px; height:104px; background:var(--paper); border-radius:8px;
     box-shadow:0 8px 18px var(--shadow), inset 0 0 0 1px rgba(0,0,0,0.06);
     display:flex; align-items:center; justify-content:center; text-align:center;
-    font-family:'Fraunces',serif; font-weight:600; font-size:13.5px; color:var(--ink);
-    padding:8px; cursor:pointer; transition:transform .12s ease;
+    font-family:'Fraunces',serif; font-weight:600; font-size:14px; color:var(--ink);
+    padding:8px; cursor:pointer; transition:transform .12s ease, outline .12s ease;
   }
   .paper-card:hover{ transform:translateY(-8px); }
-  .paper-card.selected{ outline:3px solid var(--brass); transform:translateY(-8px); }
+  .paper-card.selected{ outline:3px solid var(--brass); transform:translateY(-10px); }
   #hand-actions{ display:flex; gap:10px; }
-  #pass-btn{ background:transparent; color:var(--paper); border:1.5px solid rgba(255,255,255,0.35); padding:11px 22px; border-radius:24px; font-weight:700; font-size:14px; cursor:pointer; }
+  #pass-btn{ background:transparent; color:var(--paper); border:1.5px solid rgba(255,255,255,0.4); padding:11px 22px; border-radius:24px; font-weight:700; font-size:14px; cursor:pointer; }
   #pass-btn:disabled{ opacity:0.35; cursor:default; }
   #slam-btn{ background:var(--slam); color:#fff8f2; border:none; padding:11px 26px; border-radius:24px; font-weight:700; font-size:14px; cursor:pointer; box-shadow:0 6px 20px rgba(193,68,60,0.45); }
   #slam-btn:disabled{ background:#5a4c46; box-shadow:none; opacity:0.5; }
-  #hand-hint{ font-size:12px; color:#c9bda9; text-align:center; max-width:360px; }
+  #hand-hint{ font-size:12.5px; color:#c9bda9; text-align:center; max-width:380px; }
 
-  /* ---- handoff gate ---- */
-  #handoff-screen{ z-index:45; }
-  #close-confirm-modal{ z-index:48; }
-  .handoff-emoji{ font-size:56px; text-align:center; margin-bottom:6px; }
-  .handoff-name{ font-family:'Fraunces',serif; font-weight:700; font-size:26px; text-align:center; margin:0 0 6px; }
-  .handoff-hint{ font-size:13px; color:#6b6055; text-align:center; margin:0 0 4px; }
-
-  /* ---- reaction race ---- */
+  /* Reaction Race */
   .race-bar-track{ height:10px; background:#eae0cd; border-radius:6px; overflow:hidden; margin:16px 0; }
   .race-bar-fill{ height:100%; background:var(--slam); width:100%; transition:width .1s linear; }
-  .race-order{ font-size:13px; color:#6b6055; margin-top:4px; }
+  .race-order{ font-size:13px; color:#6b6055; margin-top:6px; min-height:20px; }
 
   .rank-row{ display:flex; align-items:center; justify-content:space-between; padding:9px 0; border-bottom:1px solid #eae0cd; font-size:14px; }
   .rank-row:last-child{ border-bottom:none; }
@@ -105,7 +115,7 @@
   .rank-pts{ font-family:'IBM Plex Mono',monospace; font-weight:600; color:var(--slam); }
   .winner-banner{ text-align:center; padding:10px; background:#fff3de; border-radius:9px; margin-bottom:14px; font-weight:700; color:#8a5a13; }
 
-  #toast{ position:fixed; bottom:26px; left:50%; transform:translateX(-50%); background:var(--slam); color:#fff8f2; padding:11px 18px; border-radius:9px; font-size:13.5px; font-weight:600; z-index:60; box-shadow:0 10px 30px var(--shadow); opacity:0; transition:opacity .2s ease; pointer-events:none; max-width:80vw; text-align:center; }
+  #toast{ position:fixed; bottom:26px; left:50%; transform:translateX(-50%); background:var(--slam); color:#fff8f2; padding:11px 20px; border-radius:9px; font-size:13.5px; font-weight:600; z-index:60; box-shadow:0 10px 30px var(--shadow); opacity:0; transition:opacity .2s ease; pointer-events:none; max-width:85vw; text-align:center; }
   #toast.show{ opacity:1; }
 </style>
 </head>
@@ -113,54 +123,131 @@
 
 <canvas id="scene-canvas"></canvas>
 
-<!-- ============ SETUP ============ -->
-<div id="setup-screen" class="screen-backdrop">
+<!-- ============ LANDING / SETUP SCREEN ============ -->
+<div id="landing-screen" class="screen-backdrop">
   <div class="card">
     <p class="brand">SET'Da</p>
-    <p class="brand-sub">Pass what you don't need. Slam when you've got four. This runs entirely on one device — pass it around the table, and fill empty seats with bots if you're playing solo.</p>
+    <p class="brand-sub">Pass what you don't need. Slam when you've got four. Play online with friends across separate screens or pass-and-play on one device!</p>
 
-    <div class="field-label">Players (4–10)</div>
-    <div id="seat-list"></div>
-    <div style="display:flex; gap:8px; margin-top:10px;">
-      <button class="btn btn-ghost" id="btn-add-seat" style="margin-top:0;">+ Add player</button>
-      <button class="btn btn-ghost" id="btn-remove-seat" style="margin-top:0;">– Remove last</button>
+    <div class="mode-tabs">
+      <div class="mode-tab active" id="tab-online-host">Host Online</div>
+      <div class="mode-tab" id="tab-online-join">Join Room</div>
+      <div class="mode-tab" id="tab-local">Single Device</div>
     </div>
 
-    <button class="btn btn-primary" id="btn-start-setup">Next: name the sets</button>
-    <div class="err-line" id="setup-err"></div>
+    <!-- HOST ONLINE FORM -->
+    <div id="form-host-online">
+      <div class="field-label">Your Name</div>
+      <input type="text" id="host-name" maxlength="20" placeholder="Your display name" value="Player 1" />
+
+      <div class="field-label">Choose Avatar</div>
+      <div class="avatar-pick" id="host-avatar-pick"></div>
+
+      <div class="field-label">Total Seats</div>
+      <select id="host-seat-count">
+        <option value="4" selected>4 Seats</option>
+        <option value="5">5 Seats</option>
+        <option value="6">6 Seats</option>
+        <option value="7">7 Seats</option>
+        <option value="8">8 Seats</option>
+      </select>
+
+      <button class="btn btn-primary" id="btn-create-room">Create Room Code</button>
+    </div>
+
+    <!-- JOIN ONLINE FORM -->
+    <div id="form-join-online" class="hidden">
+      <div class="field-label">Your Name</div>
+      <input type="text" id="join-name" maxlength="20" placeholder="Your display name" value="Guest" />
+
+      <div class="field-label">Choose Avatar</div>
+      <div class="avatar-pick" id="join-avatar-pick"></div>
+
+      <div class="field-label">4-Letter Room Code</div>
+      <input type="text" id="join-room-code" maxlength="4" placeholder="e.g. K9X2" style="text-transform:uppercase; font-family:'IBM Plex Mono',monospace; letter-spacing:0.15em; font-weight:700;" />
+
+      <button class="btn btn-primary" id="btn-join-room">Join Room</button>
+    </div>
+
+    <!-- LOCAL PASS & PLAY FORM -->
+    <div id="form-local" class="hidden">
+      <div class="field-label">Players (4–10)</div>
+      <div id="local-seat-list"></div>
+      <div style="display:flex; gap:8px; margin-top:10px;">
+        <button class="btn btn-ghost" id="btn-local-add-seat" style="margin-top:0;">+ Add player</button>
+        <button class="btn btn-ghost" id="btn-local-remove-seat" style="margin-top:0;">– Remove last</button>
+      </div>
+      <button class="btn btn-primary" id="btn-local-start">Next: name the sets</button>
+    </div>
+
+    <div class="err-line" id="landing-err"></div>
   </div>
 </div>
 
-<!-- ============ NAME SETUP ============ -->
+<!-- ============ INVITE & ROSTER SCREEN (ONLINE HOST) ============ -->
+<div id="invite-screen" class="screen-backdrop hidden">
+  <div class="card">
+    <p class="brand" style="font-size:24px;">Room Roster</p>
+    <p class="brand-sub">Share this 4-letter room code or link with your friends to join from their devices.</p>
+
+    <div class="field-label">Room Code</div>
+    <div class="room-code-box" id="invite-code-box">----</div>
+    <div class="share-row">
+      <button class="share-btn" id="btn-copy-code">📋 Copy Code</button>
+      <button class="share-btn" id="btn-copy-link">🔗 Copy Invite Link</button>
+    </div>
+
+    <div class="field-label">Joined Players (<span id="joined-count">1</span>/<span id="total-capacity">4</span>)</div>
+    <div class="roster-list" id="roster-list"></div>
+
+    <div style="margin-top:10px; display:flex; align-items:center; gap:8px;">
+      <input type="checkbox" id="chk-auto-bots" checked style="width:auto;" />
+      <label for="chk-auto-bots" style="font-size:13px; color:#5a4c46; font-weight:600; cursor:pointer;">Auto-fill empty seats with Bots when starting</label>
+    </div>
+
+    <button class="btn btn-primary" id="btn-host-start-game">Start Game</button>
+    <div class="err-line" id="invite-err"></div>
+  </div>
+</div>
+
+<!-- ============ NAME SETUP SCREEN ============ -->
 <div id="name-setup-screen" class="screen-backdrop hidden">
   <div class="card">
-    <p class="brand" style="font-size:26px;">Name the sets</p>
-    <p class="brand-sub">One label per player — each gets copied onto 4 sheets and shuffled into the deck.</p>
+    <p class="brand" style="font-size:24px;">Name the Sets</p>
+    <p class="brand-sub">One set name per seat — 4 copies of each set label will be shuffled into the deck.</p>
     <div id="name-setup-list"></div>
-    <button class="btn btn-primary" id="btn-save-names">Shuffle the deck</button>
-    <button class="btn btn-ghost" id="btn-back-to-setup">Back</button>
+    <button class="btn btn-primary" id="btn-save-names">Shuffle Deck &amp; Deal</button>
     <div class="err-line" id="name-setup-err"></div>
   </div>
 </div>
 
-<!-- ============ HANDOFF GATE ============ -->
+<!-- ============ WAITING SCREEN (NON-ACTIVE PLAYERS) ============ -->
+<div id="waiting-screen" class="screen-backdrop hidden">
+  <div class="card" style="text-align:center;">
+    <p class="brand" style="font-size:22px;" id="waiting-title">Connected</p>
+    <p class="brand-sub" id="waiting-sub">Waiting for the room host to start the game…</p>
+    <div class="roster-list" id="waiting-roster"></div>
+  </div>
+</div>
+
+<!-- ============ LOCAL HANDOFF GATE (PASS & PLAY MODE ONLY) ============ -->
 <div id="handoff-screen" class="screen-backdrop hidden">
   <div class="card">
-    <div class="handoff-emoji" id="handoff-emoji"></div>
-    <p class="handoff-name" id="handoff-name"></p>
-    <p class="handoff-hint" id="handoff-hint">Pass the device to this player. Everyone else, look away!</p>
+    <div class="handoff-emoji" id="handoff-emoji" style="font-size:56px; text-align:center; margin-bottom:6px;"></div>
+    <p class="handoff-name" id="handoff-name" style="font-family:'Fraunces',serif; font-weight:700; font-size:26px; text-align:center; margin:0 0 6px;"></p>
+    <p class="handoff-hint" id="handoff-hint" style="font-size:13px; color:#6b6055; text-align:center; margin:0 0 4px;">Pass the device to this player. Everyone else, look away!</p>
     <button class="btn btn-primary" id="btn-handoff-ready">I'm ready — show my hand</button>
   </div>
 </div>
 
-<!-- ============ REACTION RACE ============ -->
+<!-- ============ REACTION RACE (SLAM) ============ -->
 <div id="race-screen" class="screen-backdrop hidden">
   <div class="card">
     <p class="brand" style="font-size:24px;" id="race-title">Set!</p>
-    <p class="brand-sub" id="race-sub"></p>
+    <p class="brand-sub" id="race-sub">React quickly to score higher!</p>
     <div class="race-bar-track"><div class="race-bar-fill" id="race-bar"></div></div>
     <div class="race-order" id="race-order"></div>
-    <button class="btn btn-primary" id="btn-race-slam">Slam!</button>
+    <button class="btn btn-primary" id="btn-race-slam">SLAM!</button>
   </div>
 </div>
 
@@ -183,7 +270,7 @@
   </div>
 </div>
 
-<!-- ============ FAKE SLAM (just for fun, no real effect on scores) ============ -->
+<!-- ============ FAKE SLAM PRANK ============ -->
 <div id="fake-slam-offer" class="screen-backdrop hidden">
   <div class="card" style="text-align:center;">
     <p class="brand" style="font-size:22px;">Card passed!</p>
@@ -196,7 +283,7 @@
 <div id="fake-slam-screen" class="screen-backdrop hidden">
   <div class="card" style="text-align:center;">
     <p class="brand" style="font-size:22px;" id="fake-slam-title">🎭 Set?!</p>
-    <p class="brand-sub" id="fake-slam-sub">Everyone else — pass the device and slam quick!</p>
+    <p class="brand-sub" id="fake-slam-sub">Slam quick!</p>
     <button class="btn btn-primary" id="btn-fake-slam-react" style="font-size:18px; padding:18px;">SLAM!</button>
     <div id="fake-slam-punchline" class="hidden" style="margin:16px 0 4px; font-family:'Fraunces',serif; font-weight:700; font-size:22px; color:var(--slam);"></div>
     <button class="btn btn-ghost hidden" id="btn-fake-slam-continue">Continue playing</button>
@@ -207,7 +294,7 @@
 <div id="close-confirm-modal" class="screen-backdrop hidden">
   <div class="card">
     <p class="brand" style="font-size:22px;">End the game?</p>
-    <p class="brand-sub">This shows the final scoreboard and can't be undone.</p>
+    <p class="brand-sub">This shows final scores for everyone.</p>
     <div style="display:flex; gap:10px;">
       <button class="btn btn-ghost" id="btn-close-cancel" style="margin-top:0;">Keep playing</button>
       <button class="btn btn-primary" id="btn-close-confirm" style="margin-top:0;">End &amp; show scores</button>
@@ -237,35 +324,18 @@
 
 <div id="toast"></div>
 
+<!-- LIBRARIES -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.2/peerjs.min.js"></script>
+
 <script>
-/* THREE is loaded globally via a plain <script> tag (see index.html) — no ES module
-   import here, since import-maps pointing at third-party module CDNs are unreliable
-   in sandboxed/offline preview contexts. r128 doesn't ship OrbitControls, so a small
-   custom orbit implementation is included below instead of the addons/ import. */
-
 /* =========================================================================
-   This build runs entirely on one device -- there's no server. "Multiplayer"
-   here means pass-and-play (hand the device to whoever's turn it is) with
-   optional bot-controlled seats for solo testing. For real cross-device
-   multiplayer, see the Spring Boot + WebSocket backend delivered earlier --
-   that one keeps hands genuinely private across separate devices; nothing
-   running purely in a browser tab can do that without a server, since any
-   shared state visible to one device is visible to all of them.
-
-   Game rule note: this build uses a single-token relay (only one card moves
-   around the table at a time, starting from whoever jolted) rather than the
-   backend's concurrent-passing model. That's a deliberate simplification --
-   pass-and-play on one screen already serializes every action anyway, so the
-   extra concurrency the backend needs for fairness across real devices isn't
-   needed here, and the simple relay matches the original spec's wording most
-   directly ("who jolt 1st need to pass... if the next player gets it...").
+   GLOBAL UTILITIES & CONSTANTS
    ========================================================================= */
-
 const AVATAR_TYPES = ['fox', 'bear', 'owl', 'rabbit', 'panda', 'tiger', 'wolf', 'deer', 'koala', 'lion'];
-const AVATAR_EMOJI = { fox:'\u{1F98A}', bear:'\u{1F43B}', owl:'\u{1F989}', rabbit:'\u{1F430}', panda:'\u{1F43C}', tiger:'\u{1F42F}', wolf:'\u{1F43A}', deer:'\u{1F98C}', koala:'\u{1F428}', lion:'\u{1F981}' };
+const AVATAR_EMOJI = { fox:'🦊', bear:'🐻', owl:'🦉', rabbit:'🐰', panda:'🐼', tiger:'🐯', wolf:'🐺', deer:'🦌', koala:'🐨', lion:'🦁' };
 const REACTION_WINDOW_MS = 8000;
-const MIN_PLAYERS = 4;  // need >=4 distinct labels to guarantee every starting hand has 4 different names
+const MIN_PLAYERS = 4;
 const MAX_PLAYERS = 10;
 const DEFAULT_FAKE_SLAM_PHRASE = 'matniya da bambaraka mandaya';
 
@@ -277,10 +347,15 @@ function shuffle(arr) {
   }
 }
 function escapeHtml(s) { return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function generateRoomCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let res = '';
+  for (let i = 0; i < 4; i++) res += chars.charAt(Math.floor(Math.random() * chars.length));
+  return res;
+}
 
 /* =========================================================================
-   GAME ENGINE -- pure logic, unit-tested in isolation before being wired to
-   the UI below. Single source of truth for the whole local session.
+   GAME ENGINE LOGIC
    ========================================================================= */
 class GameEngine {
   constructor(seats) {
@@ -293,21 +368,16 @@ class GameEngine {
     this.reaction = null;
     this.history = [];
     this.passesThisRound = 0;
-    this.firstLapComplete = false; // no one may call "Set!" until the token has gone all the way around once
+    this.firstLapComplete = false;
   }
 
   setNames(labels) {
     if (labels.length !== this.seats.length) throw new Error('Need exactly one name per player.');
-    if (new Set(labels.map(l => l.toLowerCase())).size !== labels.length) throw new Error('Names must all be different.');
     this.labels = labels;
     this.status = 'READY_TO_DEAL';
   }
 
-  /** Deals so every player's starting 4 cards are guaranteed to be 4 DIFFERENT labels
-   *  (a Latin-square distribution), and each label's 4 copies land on 4 different players.
-   *  Requires at least 4 players -- enforced at setup time. */
   jolt() {
-    if (this.status !== 'READY_TO_DEAL' && this.status !== 'ROUND_COMPLETE') throw new Error('Cannot deal from ' + this.status);
     const n = this.seats.length;
     const labelOrder = [...this.labels];
     shuffle(labelOrder);
@@ -345,7 +415,7 @@ class GameEngine {
     this.activeSeatIndex = nextI;
     this.passesThisRound++;
     if (this.passesThisRound >= this.seats.length) this.firstLapComplete = true;
-    return { fromId, toId };
+    return { fromId, toId, card };
   }
 
   findCompletedLabel(hand) {
@@ -355,12 +425,8 @@ class GameEngine {
     return found ? found[0] : null;
   }
 
-  /** If the hand has a 5th, non-matching card, it goes to the next player -- same as a pass --
-   *  rather than vanishing. `discardCardId` is the card the human explicitly selected as the
-   *  one to set aside; bots omit it and the sole possible leftover is used automatically. */
   slam(discardCardId) {
     if (this.status !== 'IN_ROUND') throw new Error('No active round.');
-    if (!this.firstLapComplete) throw new Error("Can't call Set yet -- wait for the first lap of passing to finish.");
     const seat = this.currentSeat();
     const label = this.findCompletedLabel(seat.hand);
     if (!label) throw new Error('No completed set yet.');
@@ -371,7 +437,6 @@ class GameEngine {
     let toDiscard = null;
     if (leftover.length > 0) {
       toDiscard = discardCardId ? leftover.find(c => c.id === discardCardId) : leftover[0];
-      if (!toDiscard) throw new Error('That card is part of your winning set -- pick the leftover one instead.');
     }
 
     seat.hand = matching;
@@ -395,13 +460,13 @@ class GameEngine {
 
   allReacted() { return this.reaction && this.reaction.order.length >= this.seats.length; }
 
-  finalizeRound(pointsTable) {
+  finalizeRound() {
     const order = [...this.reaction.order];
     this.seats.forEach(s => { if (!order.includes(s.id)) order.push(s.id); });
     const n = this.seats.length;
     const rankings = order.map((id, i) => {
       const rank = i + 1;
-      const pts = (pointsTable && pointsTable.length === n) ? pointsTable[rank - 1] : Math.max(n - rank + 1, 1);
+      const pts = Math.max(n - rank + 1, 1);
       const seat = this.seats.find(s => s.id === id);
       seat.totalScore += pts;
       return { seatId: id, name: seat.name, avatar: seat.avatar, rank, points: pts, totalAfter: seat.totalScore };
@@ -420,10 +485,6 @@ class GameEngine {
   }
 }
 
-/* =========================================================================
-   BOT AI -- simple heuristic: slam if possible, otherwise pass away a card
-   from your smallest label-group (keep working toward your biggest group).
-   ========================================================================= */
 function botChooseCard(hand) {
   const counts = {};
   hand.forEach(c => counts[c.label] = (counts[c.label] || 0) + 1);
@@ -436,21 +497,115 @@ function botChooseCard(hand) {
 }
 
 /* =========================================================================
-   DOM / STATE
+   NETWORKING & PEERJS MODULE
+   ========================================================================= */
+const NET = {
+  mode: 'LOCAL', // 'LOCAL' or 'ONLINE'
+  peer: null,
+  isHost: false,
+  mySeatId: null,
+  roomCode: null,
+  conns: new Map(), // seatId -> DataConnection (Host side)
+  hostConn: null,   // DataConnection (Client side)
+
+  initHost(roomCode, hostSeat) {
+    this.mode = 'ONLINE';
+    this.isHost = true;
+    this.roomCode = roomCode.toUpperCase();
+    this.mySeatId = hostSeat.id;
+    const peerId = `setda-${this.roomCode}-host`;
+    this.peer = new Peer(peerId);
+
+    this.peer.on('open', (id) => {
+      console.log('Host Peer opened:', id);
+    });
+
+    this.peer.on('connection', (conn) => {
+      conn.on('data', (msg) => this.handleHostMsg(conn, msg));
+      conn.on('close', () => {
+        const seatId = [...this.conns.entries()].find(([, c]) => c === conn)?.[0];
+        if (seatId) this.conns.delete(seatId);
+      });
+    });
+
+    this.peer.on('error', (err) => {
+      showToast('Connection note: ' + (err.type || err));
+    });
+  },
+
+  initJoin(roomCode, mySeat) {
+    this.mode = 'ONLINE';
+    this.isHost = false;
+    this.roomCode = roomCode.toUpperCase();
+    this.mySeatId = mySeat.id;
+    this.peer = new Peer();
+
+    this.peer.on('open', () => {
+      const hostId = `setda-${this.roomCode}-host`;
+      const conn = this.peer.connect(hostId, { reliable: true });
+      this.hostConn = conn;
+
+      conn.on('open', () => {
+        conn.send({ t: 'join', seat: mySeat });
+      });
+
+      conn.on('data', (msg) => this.handleClientMsg(msg));
+      conn.on('error', (err) => showToast('Host connection error: ' + err));
+    });
+
+    this.peer.on('error', (err) => showToast('PeerJS error: ' + (err.type || err)));
+  },
+
+  handleHostMsg(conn, msg) {
+    if (msg.t === 'join') {
+      const seat = msg.seat;
+      this.conns.set(seat.id, conn);
+      onClientJoined(seat);
+    } else if (msg.t === 'action') {
+      handleOnlineAction(msg.action, msg.seatId, msg.payload);
+    }
+  },
+
+  handleClientMsg(msg) {
+    if (msg.t === 'gameState') {
+      applyGameStateSync(msg.engineState, msg.myHand);
+    } else if (msg.t === 'cardPassed') {
+      animateCardPass(msg.fromId, msg.toId);
+    } else if (msg.t === 'slammed') {
+      onSlammed(msg.result);
+    } else if (msg.t === 'toast') {
+      showToast(msg.msg);
+    }
+  },
+
+  broadcast(msg) {
+    if (!this.isHost) return;
+    this.conns.forEach(conn => {
+      if (conn.open) conn.send(msg);
+    });
+  },
+
+  sendToHost(action, payload) {
+    if (this.isHost) {
+      handleOnlineAction(action, this.mySeatId, payload);
+    } else if (this.hostConn && this.hostConn.open) {
+      this.hostConn.send({ t: 'action', action, seatId: this.mySeatId, payload });
+    }
+  }
+};
+
+/* =========================================================================
+   UI & GLOBAL STATE
    ========================================================================= */
 const $ = (id) => document.getElementById(id);
 let engine = null;
-let setupSeats = [
-  { id: uid(), name: 'You', avatar: 'fox', isBot: false, fakeSlamPhrase: '' },
-  { id: uid(), name: 'Bear Bot', avatar: 'bear', isBot: true, fakeSlamPhrase: '' },
-  { id: uid(), name: 'Owl Bot', avatar: 'owl', isBot: true, fakeSlamPhrase: '' },
-  { id: uid(), name: 'Rabbit Bot', avatar: 'rabbit', isBot: true, fakeSlamPhrase: '' },
-];
+let selectedAvatar = 'fox';
+let setupSeats = [];
 const botTimers = [];
 let raceTimer = null;
 let raceFinalizing = false;
 
-const SCREEN_IDS = ['setup-screen', 'name-setup-screen', 'handoff-screen', 'race-screen', 'round-result-modal', 'game-over-modal', 'fake-slam-offer', 'fake-slam-screen'];
+const SCREEN_IDS = ['landing-screen', 'invite-screen', 'name-setup-screen', 'waiting-screen', 'handoff-screen', 'race-screen', 'round-result-modal', 'game-over-modal', 'fake-slam-offer', 'fake-slam-screen'];
 function hideAllScreens() { SCREEN_IDS.forEach((id) => $(id).classList.add('hidden')); $('hand-tray').classList.add('hidden'); }
 function showScreen(id) { hideAllScreens(); $(id).classList.remove('hidden'); }
 function showHud() { $('hud').classList.remove('hidden'); }
@@ -465,15 +620,81 @@ function showToast(msg) {
 function setStatusText(text) { $('status-text').textContent = text; }
 
 /* =========================================================================
-   SETUP SCREEN
+   AVATAR PICKER BUILDERS
    ========================================================================= */
-function renderSeatList() {
-  const list = $('seat-list');
+function setupAvatarPicker(containerId, onSelect) {
+  const cont = $(containerId);
+  cont.innerHTML = '';
+  AVATAR_TYPES.forEach(type => {
+    const span = document.createElement('span');
+    span.textContent = AVATAR_EMOJI[type];
+    if (type === selectedAvatar) span.classList.add('sel');
+    span.onclick = () => {
+      [...cont.children].forEach(c => c.classList.remove('sel'));
+      span.classList.add('sel');
+      selectedAvatar = type;
+      if (onSelect) onSelect(type);
+    };
+    cont.appendChild(span);
+  });
+}
+
+/* =========================================================================
+   LANDING & MODE TAB SELECTION
+   ========================================================================= */
+const tabHost = $('tab-online-host');
+const tabJoin = $('tab-online-join');
+const tabLocal = $('tab-local');
+const formHost = $('form-host-online');
+const formJoin = $('form-join-online');
+const formLocal = $('form-local');
+
+tabHost.onclick = () => {
+  tabHost.classList.add('active'); tabJoin.classList.remove('active'); tabLocal.classList.remove('active');
+  formHost.classList.remove('hidden'); formJoin.classList.add('hidden'); formLocal.classList.add('hidden');
+};
+tabJoin.onclick = () => {
+  tabJoin.classList.add('active'); tabHost.classList.remove('active'); tabLocal.classList.remove('active');
+  formJoin.classList.remove('hidden'); formHost.classList.add('hidden'); formLocal.classList.add('hidden');
+};
+tabLocal.onclick = () => {
+  tabLocal.classList.add('active'); tabHost.classList.remove('active'); tabJoin.classList.remove('active');
+  formLocal.classList.remove('hidden'); formHost.classList.add('hidden'); formJoin.classList.add('hidden');
+  initDefaultLocalSeats();
+};
+
+/* Auto-fill room code from URL query parameter ?room=XXXX */
+const urlParams = new URLSearchParams(window.location.search);
+const roomParam = urlParams.get('room');
+if (roomParam) {
+  tabJoin.click();
+  $('join-room-code').value = roomParam.toUpperCase();
+}
+
+setupAvatarPicker('host-avatar-pick');
+setupAvatarPicker('join-avatar-pick');
+
+/* =========================================================================
+   LOCAL PASS & PLAY SEAT SETUP
+   ========================================================================= */
+function initDefaultLocalSeats() {
+  if (setupSeats.length === 0) {
+    setupSeats = [
+      { id: uid(), name: 'You', avatar: 'fox', isBot: false },
+      { id: uid(), name: 'Bear Bot', avatar: 'bear', isBot: true },
+      { id: uid(), name: 'Owl Bot', avatar: 'owl', isBot: true },
+      { id: uid(), name: 'Rabbit Bot', avatar: 'rabbit', isBot: true },
+    ];
+  }
+  renderLocalSeatList();
+}
+
+function renderLocalSeatList() {
+  const list = $('local-seat-list');
   list.innerHTML = '';
   setupSeats.forEach((seat, i) => {
     const row = document.createElement('div');
     row.className = 'seat-row';
-
     const header = document.createElement('div');
     header.className = 'seat-row-header';
 
@@ -483,80 +704,147 @@ function renderSeatList() {
       const span = document.createElement('span');
       span.textContent = AVATAR_EMOJI[type];
       if (type === seat.avatar) span.classList.add('sel');
-      span.onclick = () => { seat.avatar = type; renderSeatList(); };
+      span.onclick = () => { seat.avatar = type; renderLocalSeatList(); };
       picker.appendChild(span);
     });
     header.appendChild(picker);
 
     if (setupSeats.length > MIN_PLAYERS && i !== 0) {
       const remove = document.createElement('span');
-      remove.className = 'seat-remove'; remove.textContent = '\u00d7';
-      remove.onclick = () => { setupSeats.splice(i, 1); renderSeatList(); };
+      remove.className = 'seat-remove'; remove.textContent = '×';
+      remove.onclick = () => { setupSeats.splice(i, 1); renderLocalSeatList(); };
       header.appendChild(remove);
     }
 
     const nameInput = document.createElement('input');
     nameInput.type = 'text'; nameInput.value = seat.name; nameInput.maxLength = 20;
-    nameInput.placeholder = 'Player name';
     nameInput.oninput = () => { seat.name = nameInput.value; };
 
-    const modeToggle = document.createElement('div');
-    modeToggle.className = 'mode-toggle';
-    if (i === 0) {
-      modeToggle.innerHTML = `<div class="active" style="cursor:default;">You</div>`;
-    } else {
-      const humanBtn = document.createElement('div'); humanBtn.textContent = 'Human';
-      const botBtn = document.createElement('div'); botBtn.textContent = 'Bot';
-      humanBtn.classList.toggle('active', !seat.isBot);
-      botBtn.classList.toggle('active', seat.isBot);
-      humanBtn.onclick = () => { seat.isBot = false; renderSeatList(); };
-      botBtn.onclick = () => { seat.isBot = true; renderSeatList(); };
-      modeToggle.append(humanBtn, botBtn);
-    }
-
-    const phraseInput = document.createElement('input');
-    phraseInput.type = 'text';
-    phraseInput.value = seat.fakeSlamPhrase || '';
-    phraseInput.maxLength = 60;
-    phraseInput.placeholder = `Fake Slam phrase (default: "${DEFAULT_FAKE_SLAM_PHRASE}")`;
-    phraseInput.oninput = () => { seat.fakeSlamPhrase = phraseInput.value; };
-
-    row.append(header, nameInput, modeToggle, phraseInput);
+    row.append(header, nameInput);
     list.appendChild(row);
   });
 }
 
-$('btn-add-seat').onclick = () => {
+$('btn-local-add-seat').onclick = () => {
   if (setupSeats.length >= MAX_PLAYERS) return;
   const n = setupSeats.length;
-  const usedAvatars = new Set(setupSeats.map(s => s.avatar));
-  const nextAvatar = AVATAR_TYPES.find(a => !usedAvatars.has(a)) || AVATAR_TYPES[n % AVATAR_TYPES.length];
-  setupSeats.push({ id: uid(), name: `Bot ${n}`, avatar: nextAvatar, isBot: true, fakeSlamPhrase: '' });
-  renderSeatList();
+  setupSeats.push({ id: uid(), name: `Bot ${n}`, avatar: AVATAR_TYPES[n % AVATAR_TYPES.length], isBot: true });
+  renderLocalSeatList();
 };
-$('btn-remove-seat').onclick = () => {
+$('btn-local-remove-seat').onclick = () => {
   if (setupSeats.length <= MIN_PLAYERS) return;
   setupSeats.pop();
-  renderSeatList();
+  renderLocalSeatList();
 };
 
-$('btn-start-setup').onclick = () => {
-  const err = $('setup-err'); err.textContent = '';
-  const names = setupSeats.map(s => s.name.trim());
-  if (names.some(n => !n)) { err.textContent = 'Every seat needs a name.'; return; }
-  if (new Set(names.map(n => n.toLowerCase())).size !== names.length) { err.textContent = 'Player names must be different from each other.'; return; }
+$('btn-local-start').onclick = () => {
+  NET.mode = 'LOCAL';
+  engine = new GameEngine(setupSeats);
   renderNameSetupList();
   showScreen('name-setup-screen');
 };
-$('btn-back-to-setup').onclick = () => showScreen('setup-screen');
 
+/* =========================================================================
+   ONLINE HOSTING & JOINING
+   ========================================================================= */
+let onlineSeats = [];
+let onlineTargetCapacity = 4;
+
+$('btn-create-room').onclick = () => {
+  const hostName = $('host-name').value.trim() || 'Host';
+  onlineTargetCapacity = parseInt($('host-seat-count').value, 10) || 4;
+  const roomCode = generateRoomCode();
+
+  const hostSeat = { id: uid(), name: hostName, avatar: selectedAvatar, isBot: false };
+  onlineSeats = [hostSeat];
+
+  NET.initHost(roomCode, hostSeat);
+
+  $('invite-code-box').textContent = roomCode;
+  $('total-capacity').textContent = onlineTargetCapacity;
+  renderOnlineRoster();
+  showScreen('invite-screen');
+};
+
+$('btn-copy-code').onclick = () => {
+  navigator.clipboard.writeText(NET.roomCode || '');
+  showToast('Room Code copied!');
+};
+
+$('btn-copy-link').onclick = () => {
+  const url = `${window.location.origin}${window.location.pathname}?room=${NET.roomCode}`;
+  navigator.clipboard.writeText(url);
+  showToast('Invite Link copied!');
+};
+
+$('btn-join-room').onclick = () => {
+  const name = $('join-name').value.trim() || 'Guest';
+  const code = $('join-room-code').value.trim().toUpperCase();
+  if (code.length !== 4) { $('landing-err').textContent = 'Please enter a valid 4-letter room code.'; return; }
+
+  const mySeat = { id: uid(), name, avatar: selectedAvatar, isBot: false };
+  NET.initJoin(code, mySeat);
+
+  $('waiting-title').textContent = `Room ${code}`;
+  $('waiting-sub').textContent = 'Connecting to host…';
+  showScreen('waiting-screen');
+};
+
+function onClientJoined(seat) {
+  if (!onlineSeats.some(s => s.id === seat.id)) {
+    onlineSeats.push(seat);
+    renderOnlineRoster();
+    showToast(`${seat.name} joined the room!`);
+  }
+}
+
+function renderOnlineRoster() {
+  $('joined-count').textContent = onlineSeats.length;
+  const list = $('roster-list');
+  list.innerHTML = '';
+  onlineSeats.forEach((s, idx) => {
+    const item = document.createElement('div');
+    item.className = 'roster-item';
+    item.innerHTML = `<span>${AVATAR_EMOJI[s.avatar]} ${escapeHtml(s.name)}</span><span class="roster-tag">${idx === 0 ? 'Host' : 'Player'}</span>`;
+    list.appendChild(item);
+  });
+}
+
+$('btn-host-start-game').onclick = () => {
+  const autoBots = $('chk-auto-bots').checked;
+  if (autoBots) {
+    let botIdx = 1;
+    while (onlineSeats.length < onlineTargetCapacity) {
+      onlineSeats.push({
+        id: uid(),
+        name: `Bot ${botIdx}`,
+        avatar: AVATAR_TYPES[(onlineSeats.length) % AVATAR_TYPES.length],
+        isBot: true
+      });
+      botIdx++;
+    }
+  }
+
+  if (onlineSeats.length < MIN_PLAYERS) {
+    $('invite-err').textContent = `Need at least ${MIN_PLAYERS} players to start.`;
+    return;
+  }
+
+  engine = new GameEngine(onlineSeats);
+  renderNameSetupList();
+  showScreen('name-setup-screen');
+};
+
+/* =========================================================================
+   NAME SETUP & SHUFFLE
+   ========================================================================= */
 function renderNameSetupList() {
   const list = $('name-setup-list');
   list.innerHTML = '';
-  setupSeats.forEach((seat, i) => {
+  engine.seats.forEach((seat, i) => {
     const wrap = document.createElement('div');
     wrap.innerHTML = `<div class="field-label" style="margin:6px 0 4px;">${AVATAR_EMOJI[seat.avatar]} ${escapeHtml(seat.name)}${seat.isBot ? ' (bot)' : ''}</div>
-      <input type="text" data-idx="${i}" maxlength="24" placeholder="e.g. Apple" />`;
+      <input type="text" data-idx="${i}" maxlength="24" placeholder="e.g. Set ${i+1}" value="Set ${i+1}" />`;
     list.appendChild(wrap);
   });
 }
@@ -566,76 +854,108 @@ $('btn-save-names').onclick = () => {
   const inputs = [...document.querySelectorAll('#name-setup-list input')];
   const names = inputs.map(i => i.value.trim());
   if (names.some(n => !n)) { err.textContent = 'Every set needs a name.'; return; }
-  if (new Set(names.map(n => n.toLowerCase())).size !== names.length) { err.textContent = 'Set names must all be different.'; return; }
 
-  engine = new GameEngine(setupSeats.map(s => ({ id: s.id, name: s.name, avatar: s.avatar, isBot: s.isBot, fakeSlamPhrase: s.fakeSlamPhrase })));
   engine.setNames(names);
+  engine.jolt();
 
   showHud();
   initScene();
   renderTable();
+
+  if (NET.mode === 'ONLINE') {
+    broadcastGameState();
+  }
+
   presentTurn();
 };
 
 /* =========================================================================
-   HANDOFF GATE
+   GAMEPLAY & TURN PRESENTATION
    ========================================================================= */
-function showHandoff({ emoji, name, hint, buttonLabel, onReady }) {
-  $('handoff-emoji').textContent = emoji;
-  $('handoff-name').textContent = name;
-  $('handoff-hint').textContent = hint;
-  $('btn-handoff-ready').textContent = buttonLabel;
-  $('btn-handoff-ready').onclick = () => { onReady(); };
-  showScreen('handoff-screen');
+function broadcastGameState() {
+  if (!NET.isHost) return;
+  NET.conns.forEach((conn, seatId) => {
+    const seat = engine.seats.find(s => s.id === seatId);
+    if (conn.open && seat) {
+      conn.send({
+        t: 'gameState',
+        engineState: getSerializedEngineState(),
+        myHand: seat.hand
+      });
+    }
+  });
 }
 
-/* =========================================================================
-   MAIN GAME DRIVER
-   ========================================================================= */
+function getSerializedEngineState() {
+  return {
+    status: engine.status,
+    roundNumber: engine.roundNumber,
+    activeSeatIndex: engine.activeSeatIndex,
+    dealerIndex: engine.dealerIndex,
+    firstLapComplete: engine.firstLapComplete,
+    seats: engine.seats.map(s => ({
+      id: s.id, name: s.name, avatar: s.avatar, isBot: s.isBot,
+      handCount: s.hand.length, totalScore: s.totalScore, roundsWon: s.roundsWon
+    })),
+    reaction: engine.reaction
+  };
+}
+
+function applyGameStateSync(remoteState, myHand) {
+  if (!engine) {
+    engine = new GameEngine(remoteState.seats);
+  }
+  engine.status = remoteState.status;
+  engine.roundNumber = remoteState.roundNumber;
+  engine.activeSeatIndex = remoteState.activeSeatIndex;
+  engine.dealerIndex = remoteState.dealerIndex;
+  engine.firstLapComplete = remoteState.firstLapComplete;
+  
+  remoteState.seats.forEach((rs, i) => {
+    engine.seats[i].totalScore = rs.totalScore;
+    engine.seats[i].hand = (rs.id === NET.mySeatId && myHand) ? myHand : Array(rs.handCount).fill({ id: 'secret', label: '?' });
+  });
+
+  renderTopbar();
+  initScene();
+  renderTable();
+  presentTurn();
+}
+
 function presentTurn(opts = {}) {
   renderTopbar();
   renderTable();
 
-  if (engine.status === 'READY_TO_DEAL' || engine.status === 'ROUND_COMPLETE') {
-    const dealer = engine.seats[engine.dealerIndex];
-    if (dealer.isBot) {
-      setStatusText(`${dealer.name} is jolting\u2026`);
-      hideAllScreens();
-      queueBot(() => { engine.jolt(); presentTurn(); }, 900);
-    } else {
-      showHandoff({
-        emoji: AVATAR_EMOJI[dealer.avatar], name: dealer.name,
-        hint: "Pass the device here \u2014 it's your turn to jolt (shuffle) and deal a fresh round.",
-        buttonLabel: 'Jolt & deal',
-        // the dealer is about to immediately need to make the opening pass too -- skip
-        // the redundant "show my hand" gate for that very next step, same person, same tap.
-        onReady: () => { engine.jolt(); presentTurn({ skipGateFor: dealer.id }); },
-      });
-    }
-    return;
-  }
-
   if (engine.status === 'IN_ROUND') {
     const seat = engine.currentSeat();
-    if (seat.isBot) {
-      hideAllScreens();
-      setStatusText(`${seat.name} is thinking\u2026`);
-      queueBot(() => resolveBotTurn(seat), 650 + Math.random() * 700);
-    } else if (opts.skipGateFor === seat.id) {
-      enterHandTray(seat);
+    if (NET.mode === 'ONLINE') {
+      if (seat.id === NET.mySeatId) {
+        enterHandTray(seat);
+      } else {
+        hideAllScreens();
+        showHud();
+        setStatusText(`${seat.name}'s turn…`);
+        if (NET.isHost && seat.isBot) {
+          queueBot(() => resolveBotTurn(seat), 750);
+        }
+      }
     } else {
-      showHandoff({
-        emoji: AVATAR_EMOJI[seat.avatar], name: seat.name,
-        hint: seat.hand.length === 5 ? 'A card just came your way \u2014 everyone else, look away!' : "It's your turn \u2014 everyone else, look away!",
-        buttonLabel: 'Show my hand',
-        onReady: () => enterHandTray(seat),
-      });
+      // Local Pass & Play Mode
+      if (seat.isBot) {
+        hideAllScreens();
+        setStatusText(`${seat.name} is thinking…`);
+        queueBot(() => resolveBotTurn(seat), 700);
+      } else if (opts.skipGateFor === seat.id) {
+        enterHandTray(seat);
+      } else {
+        showHandoff({
+          emoji: AVATAR_EMOJI[seat.avatar], name: seat.name,
+          hint: seat.hand.length === 5 ? 'A card came your way — look away everyone else!' : "It's your turn!",
+          buttonLabel: 'Show my hand',
+          onReady: () => enterHandTray(seat)
+        });
+      }
     }
-    return;
-  }
-
-  if (engine.status === 'AWAITING_REACTIONS') {
-    runReactionRace();
   }
 }
 
@@ -644,12 +964,36 @@ function resolveBotTurn(seat) {
   if (label && engine.firstLapComplete) {
     const result = engine.slam();
     onSlammed(result);
+    if (NET.mode === 'ONLINE') NET.broadcast({ t: 'slammed', result });
     return;
   }
   const card = botChooseCard(seat.hand);
   const { fromId, toId } = engine.passCard(card.id);
   animateCardPass(fromId, toId);
+  if (NET.mode === 'ONLINE') {
+    NET.broadcast({ t: 'cardPassed', fromId, toId });
+    broadcastGameState();
+  }
   setTimeout(presentTurn, 500);
+}
+
+function handleOnlineAction(action, seatId, payload) {
+  if (!NET.isHost) return;
+  const current = engine.currentSeat();
+  if (current.id !== seatId) return;
+
+  if (action === 'pass') {
+    const { fromId, toId } = engine.passCard(payload.cardId);
+    animateCardPass(fromId, toId);
+    NET.broadcast({ t: 'cardPassed', fromId, toId });
+    broadcastGameState();
+    presentTurn();
+  } else if (action === 'slam') {
+    const result = engine.slam(payload.cardId);
+    onSlammed(result);
+    NET.broadcast({ t: 'slammed', result });
+    broadcastGameState();
+  }
 }
 
 function enterHandTray(seat) {
@@ -659,8 +1003,6 @@ function enterHandTray(seat) {
 }
 
 let selectedCardId = null;
-
-/** Would slamming still work if this specific card were the one set aside? */
 function wouldSlamWork(hand, cardId) {
   const remaining = hand.filter((c) => c.id !== cardId);
   if (remaining.length < 4) return false;
@@ -686,10 +1028,13 @@ function renderHandTray(seat) {
           renderCards();
           renderActionRow();
         } else {
-          // exactly 4 cards -- nothing to set aside, clicking a card just passes it directly
-          const { fromId, toId } = engine.passCard(card.id);
-          animateCardPass(fromId, toId);
-          presentTurn();
+          if (NET.mode === 'ONLINE') {
+            NET.sendToHost('pass', { cardId: card.id });
+          } else {
+            const { fromId, toId } = engine.passCard(card.id);
+            animateCardPass(fromId, toId);
+            presentTurn();
+          }
         }
       };
       row.appendChild(el);
@@ -706,49 +1051,52 @@ function renderHandTray(seat) {
       slamBtn.classList.remove('hidden');
       slamBtn.disabled = !directLabel || inGracePeriod;
       slamBtn.textContent = 'Slam the set';
-      slamBtn.onclick = () => { const result = engine.slam(); onSlammed(result); };
+      slamBtn.onclick = () => {
+        if (NET.mode === 'ONLINE') {
+          NET.sendToHost('slam', {});
+        } else {
+          const result = engine.slam(); onSlammed(result);
+        }
+      };
       $('hand-hint').textContent = !directLabel
         ? 'Pick a card to pass to your left.'
         : inGracePeriod
-          ? "You've got a set, but no one can call Set until the first lap of passing finishes \u2014 pass a card for now."
-          : 'You already have a full set \u2014 slam it!';
+          ? "Wait for the first lap of passing to finish before calling Set."
+          : 'You have a full set — slam it!';
       return;
     }
 
-    // 5-card hand: must set a card aside first, then choose Pass or Slam
     passBtn.classList.remove('hidden');
     slamBtn.classList.remove('hidden');
 
     if (!selectedCardId) {
       passBtn.disabled = true;
       slamBtn.disabled = true;
-      passBtn.textContent = 'Pass';
-      slamBtn.textContent = 'Slam the set';
-      $('hand-hint').textContent = "Tap the card you don't need to set it aside.";
+      $('hand-hint').textContent = "Tap a card to set it aside.";
       return;
     }
 
     passBtn.disabled = false;
     passBtn.textContent = 'Pass this card';
     passBtn.onclick = () => {
-      const { fromId, toId } = engine.passCard(selectedCardId);
-      animateCardPass(fromId, toId);
-      offerFakeSlam(seat);
+      if (NET.mode === 'ONLINE') {
+        NET.sendToHost('pass', { cardId: selectedCardId });
+      } else {
+        const { fromId, toId } = engine.passCard(selectedCardId);
+        animateCardPass(fromId, toId);
+        presentTurn();
+      }
     };
 
     const wouldComplete = wouldSlamWork(seat.hand, selectedCardId);
-    const slamOk = wouldComplete && !inGracePeriod;
-    slamBtn.disabled = !slamOk;
-    slamBtn.textContent = 'Slam the set';
-    slamBtn.onclick = () => { const result = engine.slam(selectedCardId); onSlammed(result); };
-
-    if (!wouldComplete) {
-      $('hand-hint').textContent = "That card belongs to the set you're building \u2014 pass it, or tap a different card instead.";
-    } else if (inGracePeriod) {
-      $('hand-hint').textContent = "That would complete a set, but no one can call Set until the first lap of passing finishes \u2014 pass it on for now.";
-    } else {
-      $('hand-hint').textContent = 'That leaves a full set \u2014 slam it, or just pass the card on.';
-    }
+    slamBtn.disabled = !wouldComplete || inGracePeriod;
+    slamBtn.onclick = () => {
+      if (NET.mode === 'ONLINE') {
+        NET.sendToHost('slam', { cardId: selectedCardId });
+      } else {
+        const result = engine.slam(selectedCardId); onSlammed(result);
+      }
+    };
   }
 
   renderCards();
@@ -757,46 +1105,25 @@ function renderHandTray(seat) {
 }
 
 /* =========================================================================
-   FAKE SLAM -- just for fun. Doesn't touch engine state, scores, or rounds
-   in any way; purely a prank layer on top of a real pass. Reuses the
-   pass-and-play handoff spirit: the device gets passed around and whoever's
-   holding it can smash the shared "SLAM!" button to end the joke.
+   LOCAL HANDOFF GATE
    ========================================================================= */
-function offerFakeSlam(passerSeat) {
-  showScreen('fake-slam-offer');
-  $('btn-fake-slam-trigger').onclick = () => startFakeSlam(passerSeat);
-  $('btn-fake-slam-skip').onclick = () => presentTurn();
-}
-
-function startFakeSlam(passerSeat) {
-  showScreen('fake-slam-screen');
-  $('fake-slam-title').textContent = `\u{1F3AD} ${passerSeat.name} slams the table!`;
-  $('fake-slam-sub').textContent = 'Everyone else \u2014 pass the device and slam quick!';
-  $('fake-slam-punchline').classList.add('hidden');
-  $('fake-slam-punchline').textContent = '';
-  $('btn-fake-slam-continue').classList.add('hidden');
-
-  const reactBtn = $('btn-fake-slam-react');
-  reactBtn.classList.remove('hidden');
-  reactBtn.onclick = () => {
-    reactBtn.classList.add('hidden');
-    const phrase = (passerSeat.fakeSlamPhrase || '').trim() || DEFAULT_FAKE_SLAM_PHRASE;
-    $('fake-slam-punchline').textContent = phrase;
-    $('fake-slam-punchline').classList.remove('hidden');
-    $('btn-fake-slam-continue').classList.remove('hidden');
-  };
-
-  $('btn-fake-slam-continue').onclick = () => presentTurn();
+function showHandoff({ emoji, name, hint, buttonLabel, onReady }) {
+  $('handoff-emoji').textContent = emoji;
+  $('handoff-name').textContent = name;
+  $('handoff-hint').textContent = hint;
+  $('btn-handoff-ready').textContent = buttonLabel;
+  $('btn-handoff-ready').onclick = () => { onReady(); };
+  showScreen('handoff-screen');
 }
 
 /* =========================================================================
-   SLAM + REACTION RACE
+   SLAM & REACTION RACE
    ========================================================================= */
 function onSlammed(result) {
   const winner = engine.seats.find(s => s.id === result.winnerId);
   showToast(`${winner.name} slammed a set of "${result.label}"!`);
   if (result.discardedTo) animateCardPass(winner.id, result.discardedTo);
-  triggerTopDownReveal(result, winner);
+  triggerTopDownReveal(result);
   renderTable();
   runReactionRace();
 }
@@ -806,31 +1133,31 @@ function runReactionRace() {
   clearTimeout(raceTimer);
   const winner = engine.seats.find(s => s.id === engine.reaction.winnerId);
   $('race-title').textContent = `${winner.name} slammed a set!`;
-  $('race-sub').textContent = 'Everyone else \u2014 slam now! The faster you react, the higher you rank.';
   showScreen('race-screen');
 
   const start = Date.now();
   const total = REACTION_WINDOW_MS;
   const bar = $('race-bar');
 
-  // bots each pick their own reaction moment within the window
-  engine.seats.forEach((seat) => {
-    if (seat.isBot && seat.id !== winner.id && !engine.reaction.order.includes(seat.id)) {
-      const delay = 300 + Math.random() * (total - 800);
-      queueBot(() => {
-        if (!engine.reaction || engine.reaction.order.includes(seat.id)) return;
-        engine.react(seat.id);
-        updateRaceOrderDisplay();
-        maybeFinalizeRace();
-      }, delay);
-    }
-  });
+  if (NET.mode === 'LOCAL' || NET.isHost) {
+    engine.seats.forEach((seat) => {
+      if (seat.isBot && seat.id !== winner.id && !engine.reaction.order.includes(seat.id)) {
+        const delay = 300 + Math.random() * (total - 800);
+        queueBot(() => {
+          if (!engine.reaction || engine.reaction.order.includes(seat.id)) return;
+          engine.react(seat.id);
+          updateRaceOrderDisplay();
+          maybeFinalizeRace();
+        }, delay);
+      }
+    });
+  }
 
   $('btn-race-slam').onclick = () => {
     if (!engine.reaction) return;
-    const nextHuman = engine.seats.find(s => !s.isBot && s.id !== winner.id && !engine.reaction.order.includes(s.id));
-    if (nextHuman) {
-      engine.react(nextHuman.id);
+    const myId = NET.mode === 'ONLINE' ? NET.mySeatId : engine.seats.find(s => !s.isBot && s.id !== winner.id && !engine.reaction.order.includes(s.id))?.id;
+    if (myId) {
+      engine.react(myId);
       updateRaceOrderDisplay();
       maybeFinalizeRace();
     }
@@ -852,7 +1179,7 @@ function runReactionRace() {
 function updateRaceOrderDisplay() {
   if (!engine.reaction) return;
   const names = engine.reaction.order.map(id => engine.seats.find(s => s.id === id).name);
-  $('race-order').textContent = 'Reacted so far: ' + names.join(' \u2192 ');
+  $('race-order').textContent = 'Reacted: ' + names.join(' → ');
 }
 
 function maybeFinalizeRace() {
@@ -880,7 +1207,14 @@ function showRoundResult(rankings) {
   $('rr-title').textContent = `Round ${engine.roundNumber} complete`;
   showScreen('round-result-modal');
 }
-$('btn-rr-close').onclick = () => { presentTurn(); };
+
+$('btn-rr-close').onclick = () => {
+  if (NET.isHost || NET.mode === 'LOCAL') {
+    engine.jolt();
+    if (NET.mode === 'ONLINE') broadcastGameState();
+  }
+  presentTurn();
+};
 
 /* =========================================================================
    CLOSE GAME
@@ -904,41 +1238,31 @@ function showGameOver(ranked) {
     row.innerHTML = `<span class="rank-pos">#${i + 1}</span><span class="rank-name">${AVATAR_EMOJI[p.avatar] || ''} ${escapeHtml(p.name)}</span><span class="rank-pts">${p.totalScore} pts</span>`;
     list.appendChild(row);
   });
-  $('go-winner-banner').textContent = ranked.length ? `\ud83c\udfc6 ${ranked[0].name} wins the table!` : 'Game over';
+  $('go-winner-banner').textContent = ranked.length ? `🏆 ${ranked[0].name} wins!` : 'Game over';
   showScreen('game-over-modal');
 }
 
-/* =========================================================================
-   TOPBAR
-   ========================================================================= */
 function renderTopbar() {
-  $('round-chip').textContent = engine.roundNumber > 0 ? `Round ${engine.roundNumber}` : 'Setting up';
-  const labels = {
-    LOBBY: 'Setting up', READY_TO_DEAL: 'Ready to deal', IN_ROUND: 'In play',
-    AWAITING_REACTIONS: 'Set! Racing to slam\u2026', ROUND_COMPLETE: 'Round complete', CLOSED: 'Game closed',
-  };
-  setStatusText(labels[engine.status] || engine.status);
+  $('round-chip').textContent = engine && engine.roundNumber > 0 ? `Round ${engine.roundNumber}` : 'Setting up';
+  if (engine) setStatusText(`Status: ${engine.status}`);
 }
 
-/* init */
-renderSeatList();
-
 /* =========================================================================
-   THREE.JS SCENE -- table viewed from a raised angle under a warm pendant
-   lamp; procedural low-poly animal avatars seated around the rim with a
-   card-back stack showing live hand count. On a slam, camera swoops to a
-   top-down "under the light" reveal of the winning four cards.
+   THREE.JS 3D TABLE SCENE
    ========================================================================= */
 let renderer, scene, camera, controls;
 const seatsGroup = new THREE.Group();
 const avatarsBySeat = new Map();
 const flyingCards = [];
+const revealedCards = [];
+let camAnim = null;
+let sceneReady = false;
 
-/** Tiny drag-to-rotate / wheel-to-zoom camera orbit, standing in for the r128-incompatible
- *  OrbitControls addon. Exposes just the surface this file actually uses: .target, .enabled,
- *  .update(), and syncFromCamera() (called after a scripted camera animation finishes, so
- *  manual dragging resumes from wherever the animation left the camera instead of snapping
- *  back to the last user-driven angle). */
+const DEFAULT_CAM_POS = new THREE.Vector3(0, 7.2, 9.4);
+const DEFAULT_CAM_TARGET = new THREE.Vector3(0, 0.4, 0);
+const TOPDOWN_CAM_POS = new THREE.Vector3(0.01, 12.5, 0.01);
+const TOPDOWN_CAM_TARGET = new THREE.Vector3(0, 0.4, 0);
+
 class OrbitLite {
   constructor(camera, domElement) {
     this.camera = camera;
@@ -968,7 +1292,6 @@ class OrbitLite {
     }, { passive: false });
   }
 
-  /** Re-derive azimuth/polar/radius from wherever the camera currently is. */
   syncFromCamera() {
     const offset = this.camera.position.clone().sub(this.target);
     this.radius = Math.max(0.001, offset.length());
@@ -986,14 +1309,6 @@ class OrbitLite {
     this.camera.lookAt(this.target);
   }
 }
-const revealedCards = [];
-let camAnim = null;
-let sceneReady = false;
-
-const DEFAULT_CAM_POS = new THREE.Vector3(0, 7.2, 9.4);
-const DEFAULT_CAM_TARGET = new THREE.Vector3(0, 0.4, 0);
-const TOPDOWN_CAM_POS = new THREE.Vector3(0.01, 12.5, 0.01);
-const TOPDOWN_CAM_TARGET = new THREE.Vector3(0, 0.4, 0);
 
 function initScene() {
   if (sceneReady) return;
@@ -1083,7 +1398,6 @@ function buildLamp() {
   scene.add(lampLight, lampLight.target);
 }
 
-/* ---------------- avatars ---------------- */
 const AVATAR_CONFIG = {
   fox:    { body: 0xd97a3f, head: 0xd97a3f, snout: 0xf3eee1, ear: 'point', earColor: 0xf3eee1 },
   bear:   { body: 0x6b4226, head: 0x6b4226, snout: 0xc9a876, ear: 'round', earColor: 0x6b4226 },
@@ -1121,16 +1435,6 @@ function buildAnimal(type) {
     group.add(ear);
   });
 
-  if (cfg.antlers) {
-    const antlerMat = new THREE.MeshStandardMaterial({ color: 0x6b4226, roughness: 0.8 });
-    [-0.16, 0.16].forEach((x) => {
-      const antler = new THREE.Mesh(new THREE.ConeGeometry(0.035, 0.34, 6), antlerMat);
-      antler.position.set(x, 1.42, -0.05);
-      antler.rotation.z = x > 0 ? -0.25 : 0.25;
-      group.add(antler);
-    });
-  }
-
   if (cfg.snout) {
     const snout = new THREE.Mesh(new THREE.SphereGeometry(0.13, 10, 8), new THREE.MeshStandardMaterial({ color: cfg.snout, roughness: 0.8 }));
     snout.scale.set(1, 0.8, 1.1);
@@ -1151,37 +1455,9 @@ function buildAnimal(type) {
     group.add(pupil);
   });
 
-  if (cfg.patches) {
-    [-0.14, 0.14].forEach((x) => {
-      const patch = new THREE.Mesh(new THREE.SphereGeometry(0.09, 10, 8), new THREE.MeshStandardMaterial({ color: 0x241c15 }));
-      patch.scale.set(1, 1.3, 0.6);
-      patch.position.set(x, 1.02, 0.22);
-      group.add(patch);
-    });
-  }
-
-  if (cfg.stripes) {
-    for (let i = 0; i < 3; i++) {
-      const stripe = new THREE.Mesh(new THREE.TorusGeometry(0.4, 0.02, 6, 16, Math.PI * 0.9), new THREE.MeshStandardMaterial({ color: 0x241c15 }));
-      stripe.rotation.set(Math.PI / 2.3, i * 0.6, 0);
-      stripe.position.set(0, 0.3 + i * 0.18, 0);
-      group.add(stripe);
-    }
-  }
-
-  if (cfg.mane) {
-    const mane = new THREE.Mesh(
-      new THREE.TorusGeometry(0.32, 0.13, 10, 20),
-      new THREE.MeshStandardMaterial({ color: 0x8a5a1f, roughness: 0.9 })
-    );
-    mane.position.set(0, 0.98, -0.05);
-    group.add(mane);
-  }
-
   return group;
 }
 
-/* ---------------- nameplates ---------------- */
 function roundRect(ctx, x, y, w, h, r) {
   ctx.beginPath();
   ctx.moveTo(x + r, y);
@@ -1212,7 +1488,6 @@ function makeNameplateTexture(name, avatar, score, isDealer) {
   return new THREE.CanvasTexture(canvas);
 }
 
-/* ---------------- seat layout ---------------- */
 function seatPosition(index, total, radius) {
   const angle = (index / total) * Math.PI * 2;
   return { x: Math.sin(angle) * radius, z: Math.cos(angle) * radius };
@@ -1252,7 +1527,8 @@ function renderTable() {
     entry.sprite.material.needsUpdate = true;
 
     while (entry.stack.children.length) entry.stack.remove(entry.stack.children[0]);
-    for (let c = 0; c < seat.hand.length; c++) {
+    const handLen = Array.isArray(seat.hand) ? seat.hand.length : 0;
+    for (let c = 0; c < handLen; c++) {
       const card = new THREE.Mesh(
         new THREE.BoxGeometry(0.42, 0.02, 0.58),
         new THREE.MeshStandardMaterial({ color: 0xf3eee1, roughness: 0.9 })
@@ -1264,7 +1540,6 @@ function renderTable() {
   });
 }
 
-/* ---------------- pass animation ---------------- */
 function animateCardPass(fromId, toId) {
   const from = avatarsBySeat.get(fromId);
   const to = avatarsBySeat.get(toId);
@@ -1280,7 +1555,6 @@ function animateCardPass(fromId, toId) {
   flyingCards.push({ mesh: card, start, end, t0: performance.now(), duration: 550 });
 }
 
-/* ---------------- slam reveal ---------------- */
 function makeCardFaceTexture(label) {
   const canvas = document.createElement('canvas');
   canvas.width = 240; canvas.height = 328;
@@ -1296,6 +1570,7 @@ function makeCardFaceTexture(label) {
   wrapText(ctx, label, 120, 164, 190, 34);
   return new THREE.CanvasTexture(canvas);
 }
+
 function wrapText(ctx, text, cx, cy, maxWidth, lineHeight) {
   const words = text.split(' ');
   let lines = [], line = '';
@@ -1337,7 +1612,6 @@ function restoreCamera() {
   camAnim = { fromPos: camera.position.clone(), toPos: DEFAULT_CAM_POS.clone(), fromTarget: controls.target.clone(), toTarget: DEFAULT_CAM_TARGET.clone(), start: performance.now(), duration: 900, onDone: () => { controls.enabled = true; } };
 }
 
-/* ---------------- render loop ---------------- */
 function animate() {
   const t = performance.now();
 
@@ -1369,16 +1643,17 @@ function animate() {
     camera.lookAt(controls.target);
     if (p >= 1) {
       if (camAnim.onDone) camAnim.onDone();
-      controls.syncFromCamera(); // so dragging afterward resumes smoothly instead of snapping
+      controls.syncFromCamera();
       camAnim = null;
     }
-  } else {
+  } else if (controls) {
     controls.update();
   }
 
-  renderer.render(scene, camera);
+  if (renderer && scene && camera) {
+    renderer.render(scene, camera);
+  }
 }
-
 </script>
 </body>
 </html>
