@@ -33,7 +33,7 @@
   }
   .brand{
     font-family:'Fraunces',serif; font-weight:700; font-size:32px; letter-spacing:-0.01em; margin:0 0 4px; text-align:center;
-    background:linear-gradient(135deg, #241C15 0%, #6B4226 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    background:linear-gradient(135deg, #241C15 0%, #6B4226 100%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
   }
   .brand-sub{ font-size:13px; color:#6b6055; margin:0 0 18px; line-height:1.45; text-align:center; }
   .field-label{ font-size:11.5px; text-transform:uppercase; letter-spacing:0.1em; color:#8a7d6d; font-weight:700; margin:14px 0 6px; }
@@ -148,6 +148,20 @@
 
   #toast{ position:fixed; bottom:28px; left:50%; transform:translateX(-50%); background:rgba(20,17,13,0.92); color:#fff8f2; border:1px solid rgba(232,163,61,0.4); padding:12px 24px; border-radius:12px; font-size:14px; font-weight:600; z-index:60; box-shadow:0 12px 35px var(--shadow); opacity:0; transition:opacity .2s ease, transform .2s ease; pointer-events:none; max-width:85vw; text-align:center; backdrop-filter:blur(8px); }
   #toast.show{ opacity:1; transform:translateX(-50%) translateY(-4px); }
+
+  /* Interactive Reaction Bar */
+  .reaction-bar{
+    position:fixed; bottom:22px; right:22px; z-index:35; pointer-events:auto;
+    display:flex; gap:6px; background:rgba(20,17,13,0.85); border:1px solid rgba(232,163,61,0.35);
+    padding:8px 14px; border-radius:30px; box-shadow:0 10px 30px rgba(0,0,0,0.6), 0 0 20px rgba(232,163,61,0.25);
+    backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+  }
+  .react-btn{
+    background:transparent; border:none; font-size:20px; cursor:pointer; padding:4px 6px;
+    border-radius:50%; transition:transform .12s ease, filter .12s ease;
+  }
+  .react-btn:hover{ transform:scale(1.35); filter:drop-shadow(0 0 8px rgba(232,163,61,0.8)); }
+  .react-btn:active{ transform:scale(1.05); }
 </style>
 </head>
 <body>
@@ -324,11 +338,12 @@
 <!-- ============ CLOSE CONFIRM ============ -->
 <div id="close-confirm-modal" class="screen-backdrop hidden">
   <div class="card">
-    <p class="brand" style="font-size:22px;">End the game?</p>
-    <p class="brand-sub">This shows final scores for everyone.</p>
-    <div style="display:flex; gap:10px;">
-      <button class="btn btn-ghost" id="btn-close-cancel" style="margin-top:0;">Keep playing</button>
-      <button class="btn btn-primary" id="btn-close-confirm" style="margin-top:0;">End &amp; show scores</button>
+    <p class="brand" style="font-size:22px;">Leave or End Game?</p>
+    <p class="brand-sub">You can leave your seat to be replaced by a Bot so others continue, or end the game for everyone.</p>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <button class="btn btn-primary" id="btn-leave-seat" style="margin-top:0;">🤖 Leave Seat &amp; Continue with Bot</button>
+      <button class="btn btn-ghost" id="btn-close-confirm" style="margin-top:0;">🏁 End Game for Everyone</button>
+      <button class="btn btn-ghost" id="btn-close-cancel" style="margin-top:0;">Keep Playing</button>
     </div>
   </div>
 </div>
@@ -354,6 +369,17 @@
       <button id="pass-btn" class="hidden" disabled>Pass</button>
       <button id="slam-btn" disabled>Call SET!</button>
     </div>
+  </div>
+
+  <div id="reaction-bar" class="reaction-bar hidden">
+    <button class="react-btn" data-emoji="👏" title="Clap">👏</button>
+    <button class="react-btn" data-emoji="🎉" title="Party">🎉</button>
+    <button class="react-btn" data-emoji="🔥" title="Fire">🔥</button>
+    <button class="react-btn" data-emoji="🎭" title="Mischief">🎭</button>
+    <button class="react-btn" data-emoji="👑" title="Crown">👑</button>
+    <button class="react-btn" data-emoji="💩" title="Oops">💩</button>
+    <button class="react-btn" data-emoji="⚡" title="Speed">⚡</button>
+    <button class="react-btn" data-emoji="🚀" title="Rocket">🚀</button>
   </div>
 </div>
 
@@ -580,7 +606,10 @@ const NET = {
       conn.on('data', (msg) => this.handleHostMsg(conn, msg));
       conn.on('close', () => {
         const seatId = [...this.conns.entries()].find(([, c]) => c === conn)?.[0];
-        if (seatId) this.conns.delete(seatId);
+        if (seatId) {
+          this.conns.delete(seatId);
+          onClientLeft(seatId);
+        }
       });
     });
 
@@ -619,6 +648,9 @@ const NET = {
       onClientJoined(seat);
     } else if (msg.t === 'action') {
       handleOnlineAction(msg.action, msg.seatId, msg.payload);
+    } else if (msg.t === 'emoji') {
+      spawnFloatingEmoji(msg.seatId, msg.payload.emoji);
+      NET.broadcast({ t: 'emoji', seatId: msg.seatId, emoji: msg.payload.emoji });
     }
   },
 
@@ -646,6 +678,18 @@ const NET = {
       clearBotTimers();
       if (engine) engine.status = 'CLOSED';
       showGameOver(msg.ranked);
+    } else if (msg.t === 'playerLeft') {
+      if (engine) {
+        const seat = engine.seats.find(s => s.id === msg.seatId);
+        if (seat) {
+          seat.isBot = true;
+          seat.name = msg.botName;
+        }
+      }
+      showToast(msg.msg);
+      renderTable();
+    } else if (msg.t === 'emoji') {
+      spawnFloatingEmoji(msg.seatId, msg.emoji);
     } else if (msg.t === 'toast') {
       showToast(msg.msg);
     }
@@ -681,7 +725,7 @@ let raceFinalizing = false;
 const SCREEN_IDS = ['landing-screen', 'invite-screen', 'name-setup-screen', 'waiting-screen', 'handoff-screen', 'race-screen', 'round-result-modal', 'game-over-modal', 'fake-slam-offer', 'fake-slam-screen'];
 function hideAllScreens() { SCREEN_IDS.forEach((id) => $(id).classList.add('hidden')); }
 function showScreen(id) { hideAllScreens(); $(id).classList.remove('hidden'); }
-function showHud() { $('hud').classList.remove('hidden'); }
+function showHud() { $('hud').classList.remove('hidden'); const bar = $('reaction-bar'); if (bar) bar.classList.remove('hidden'); }
 function queueBot(fn, delay) { botTimers.push(setTimeout(fn, delay)); }
 function clearBotTimers() { botTimers.forEach(clearTimeout); botTimers.length = 0; }
 
@@ -982,6 +1026,76 @@ function applyGameStateSync(remoteState, myHand) {
   presentTurn();
 }
 
+/* =========================================================================
+   WEB AUDIO SOUND SYNTHESIZER
+   ========================================================================= */
+const SFX = {
+  ctx: null,
+  init() {
+    if (!this.ctx) {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) this.ctx = new AudioCtx();
+    }
+  },
+  pass() {
+    this.init(); if (!this.ctx) return;
+    try {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(340, this.ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(140, this.ctx.currentTime + 0.12);
+      gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.12);
+      osc.connect(gain); gain.connect(this.ctx.destination);
+      osc.start(); osc.stop(this.ctx.currentTime + 0.12);
+    } catch(e){}
+  },
+  set() {
+    this.init(); if (!this.ctx) return;
+    try {
+      [440, 554, 659, 880].forEach((freq, i) => {
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.25, this.ctx.currentTime + i * 0.08);
+        gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + i * 0.08 + 0.3);
+        osc.connect(gain); gain.connect(this.ctx.destination);
+        osc.start(this.ctx.currentTime + i * 0.08);
+        osc.stop(this.ctx.currentTime + i * 0.08 + 0.3);
+      });
+    } catch(e){}
+  },
+  pop() {
+    this.init(); if (!this.ctx) return;
+    try {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(550, this.ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(1100, this.ctx.currentTime + 0.08);
+      gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.08);
+      osc.connect(gain); gain.connect(this.ctx.destination);
+      osc.start(); osc.stop(this.ctx.currentTime + 0.08);
+    } catch(e){}
+  },
+  tick() {
+    this.init(); if (!this.ctx) return;
+    try {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.value = 750;
+      gain.gain.setValueAtTime(0.06, this.ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.001, this.ctx.currentTime + 0.04);
+      osc.connect(gain); gain.connect(this.ctx.destination);
+      osc.start(); osc.stop(this.ctx.currentTime + 0.04);
+    } catch(e){}
+  }
+};
+
 const TURN_TIMEOUT_MS = 20000;
 let turnTimerInterval = null;
 let turnTimerDeadline = null;
@@ -1006,6 +1120,7 @@ function startTurnTimer(seat) {
     if (chip) {
       chip.textContent = `⏱ ${remaining}s`;
       if (remaining <= 5) {
+        SFX.tick();
         chip.style.borderColor = '#C1443C';
         chip.style.color = '#ff6b62';
         chip.style.background = 'rgba(193,68,60,0.4)';
@@ -1126,6 +1241,11 @@ function resolveBotTurn(seat) {
 function handleOnlineAction(action, seatId, payload) {
   if (!NET.isHost) return;
   const current = engine.currentSeat();
+
+  if (action === 'leave') {
+    onClientLeft(seatId);
+    return;
+  }
 
   if (action === 'react') {
     engine.react(seatId);
@@ -1289,6 +1409,7 @@ function showHandoff({ emoji, name, hint, buttonLabel, onReady }) {
 
 function onSlammed(result) {
   stopTurnTimer();
+  SFX.set();
   if (NET.mode === 'ONLINE' && !NET.isHost) {
     if (engine) {
       engine.reaction = { winnerId: result.winnerId, order: [result.winnerId], deadline: Date.now() + REACTION_WINDOW_MS };
@@ -1408,8 +1529,40 @@ $('btn-rr-close').onclick = () => {
   presentTurn();
 };
 
+function onClientLeft(seatId) {
+  if (!engine) return;
+  const seat = engine.seats.find(s => s.id === seatId);
+  if (seat && !seat.isBot) {
+    seat.isBot = true;
+    seat.name = `${seat.name} (Bot)`;
+    const msg = `${seat.name} left. Replaced by a Bot so the game continues!`;
+    showToast(msg);
+    if (NET.isHost) {
+      NET.broadcast({ t: 'playerLeft', seatId, botName: seat.name, msg });
+    }
+    renderTable();
+    if (engine.status === 'IN_ROUND' && engine.currentSeat().id === seat.id) {
+      presentTurn();
+    }
+  }
+}
+
 $('btn-close-game').onclick = () => { if (engine) $('close-confirm-modal').classList.remove('hidden'); };
 $('btn-close-cancel').onclick = () => $('close-confirm-modal').classList.add('hidden');
+$('btn-leave-seat').onclick = () => {
+  $('close-confirm-modal').classList.add('hidden');
+  if (NET.mode === 'ONLINE') {
+    if (!NET.isHost) {
+      NET.sendToHost('leave', {});
+      showToast('You left the room. Game continues for other players!');
+      setTimeout(() => location.reload(), 1200);
+    } else {
+      onClientLeft(NET.mySeatId);
+    }
+  } else {
+    if (engine) onClientLeft(engine.currentSeat().id);
+  }
+};
 $('btn-close-confirm').onclick = () => {
   $('close-confirm-modal').classList.add('hidden');
   clearBotTimers();
@@ -1760,12 +1913,26 @@ function renderTable() {
 
       group.position.set(x, 0, z);
       group.lookAt(0, 0, 0);
+
+      const turnRing = new THREE.Mesh(
+        new THREE.RingGeometry(0.55, 0.72, 32),
+        new THREE.MeshBasicMaterial({ color: 0xe8a33d, side: THREE.DoubleSide, transparent: true, opacity: 0 })
+      );
+      turnRing.rotation.x = -Math.PI / 2;
+      turnRing.position.y = 0.36;
+      group.add(turnRing);
+
       seatsGroup.add(group);
-      entry = { group, sprite, stack, bobPhase: Math.random() * Math.PI * 2 };
+      entry = { group, sprite, stack, turnRing, bobPhase: Math.random() * Math.PI * 2 };
       avatarsBySeat.set(seat.id, entry);
     } else {
       entry.group.position.set(x, 0, z);
       entry.group.lookAt(0, 0, 0);
+    }
+
+    const isCurrentTurn = (i === engine.activeSeatIndex && engine.status === 'IN_ROUND');
+    if (entry.turnRing) {
+      entry.turnRing.material.opacity = isCurrentTurn ? 0.85 : 0;
     }
 
     entry.sprite.material.map = makeNameplateTexture(seat.name, seat.avatar, seat.totalScore, i === engine.dealerIndex);
@@ -1788,6 +1955,7 @@ function renderTable() {
 }
 
 function animateCardPass(fromId, toId) {
+  SFX.pass();
   const from = avatarsBySeat.get(fromId);
   const to = avatarsBySeat.get(toId);
   if (!from || !to) return;
@@ -1906,6 +2074,59 @@ function animate() {
     renderer.render(scene, camera);
   }
 }
+
+function spawnFloatingEmoji(seatId, emoji) {
+  const entry = avatarsBySeat.get(seatId);
+  if (!entry) return;
+  
+  const canvas = document.createElement('canvas');
+  canvas.width = 128; canvas.height = 128;
+  const ctx = canvas.getContext('2d');
+  ctx.font = '72px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(emoji, 64, 64);
+  
+  const tex = new THREE.CanvasTexture(canvas);
+  const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true }));
+  sprite.scale.set(0.95, 0.95, 1);
+  sprite.position.set(entry.group.position.x, 2.5, entry.group.position.z);
+  scene.add(sprite);
+
+  SFX.pop();
+
+  const startY = 2.5;
+  const startT = performance.now();
+  function floatAnim() {
+    const elapsed = performance.now() - startT;
+    const p = Math.min(1, elapsed / 1200);
+    sprite.position.y = startY + p * 0.8;
+    sprite.material.opacity = 1 - p;
+    if (p < 1) {
+      requestAnimationFrame(floatAnim);
+    } else {
+      scene.remove(sprite);
+    }
+  }
+  floatAnim();
+}
+
+document.querySelectorAll('.react-btn').forEach(btn => {
+  btn.onclick = () => {
+    const emoji = btn.dataset.emoji;
+    const myId = NET.mode === 'ONLINE' ? NET.mySeatId : (engine ? engine.currentSeat().id : null);
+    if (myId) {
+      spawnFloatingEmoji(myId, emoji);
+      if (NET.mode === 'ONLINE') {
+        if (NET.isHost) {
+          NET.broadcast({ t: 'emoji', seatId: myId, emoji });
+        } else {
+          NET.sendToHost('emoji', { emoji });
+        }
+      }
+    }
+  };
+});
 </script>
 </body>
 </html>
