@@ -1120,7 +1120,8 @@ function maybeShowWaiting() {
   }
   if (state.status === 'READY_TO_DEAL' || state.status === 'ROUND_COMPLETE') {
     const me = state.players.find((p) => p.seatId === state.mySeatId);
-    if (me && me.isDealer) {
+    const canDeal = !!(me && me.isDealer) || state.isAdmin;
+    if (canDeal) {
       hideAllScreens(); showHud();
       $('hand-tray').classList.remove('hidden');
       $('hand-row').innerHTML = '';
@@ -1313,6 +1314,7 @@ let renderer, scene, camera, controls;
 const seatsGroup = new THREE.Group();
 const avatarsBySeat = new Map();
 const flyingCards = [];
+let sceneInitErrorShown = false;
 
 /** Tiny drag-to-rotate / wheel-to-zoom camera orbit, standing in for the r128-incompatible
  *  OrbitControls addon. Exposes just the surface this file actually uses: .target, .enabled,
@@ -1377,34 +1379,44 @@ const TOPDOWN_CAM_TARGET = new THREE.Vector3(0, 0.4, 0);
 
 function initScene() {
   if (sceneReady) return;
-  sceneReady = true;
 
-  const canvas = $('scene-canvas');
-  renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  try {
+    const canvas = $('scene-canvas');
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
 
-  scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x0c0a08);
-  scene.fog = new THREE.Fog(0x0c0a08, 14, 26);
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0c0a08);
+    scene.fog = new THREE.Fog(0x0c0a08, 14, 26);
 
-  camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 100);
-  camera.position.copy(DEFAULT_CAM_POS);
-  camera.lookAt(DEFAULT_CAM_TARGET);
+    camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.copy(DEFAULT_CAM_POS);
+    camera.lookAt(DEFAULT_CAM_TARGET);
 
-  controls = new OrbitLite(camera, renderer.domElement);
-  controls.target.copy(DEFAULT_CAM_TARGET);
-  controls.syncFromCamera();
-  controls.update();
+    controls = new OrbitLite(camera, renderer.domElement);
+    controls.target.copy(DEFAULT_CAM_TARGET);
+    controls.syncFromCamera();
+    controls.update();
 
-  scene.add(new THREE.HemisphereLight(0x8a7d6d, 0x1a1410, 0.55));
+    scene.add(new THREE.HemisphereLight(0x8a7d6d, 0x1a1410, 0.55));
 
-  buildTable();
-  buildLamp();
-  scene.add(seatsGroup);
+    buildTable();
+    buildLamp();
+    scene.add(seatsGroup);
 
-  window.addEventListener('resize', onResize);
-  renderer.setAnimationLoop(animate);
+    window.addEventListener('resize', onResize);
+    renderer.setAnimationLoop(animate);
+    sceneReady = true;
+    sceneInitErrorShown = false;
+  } catch (err) {
+    sceneReady = false;
+    if (!sceneInitErrorShown) {
+      sceneInitErrorShown = true;
+      showToast('3D table failed to start. Refresh once and rejoin the room.');
+    }
+    console.error('Scene init failed:', err);
+  }
 }
 
 function onResize() {
@@ -1732,42 +1744,50 @@ function restoreCamera() {
 function animate() {
   const t = performance.now();
 
-  avatarsBySeat.forEach((entry) => {
-    entry.group.children[0].position.y = 0.02 * Math.sin(t * 0.0018 + entry.bobPhase);
-  });
+  if (!renderer || !scene || !camera || !controls) return;
 
-  for (let i = flyingCards.length - 1; i >= 0; i--) {
-    const f = flyingCards[i];
-    const p = Math.min(1, (t - f.t0) / f.duration);
-    const eased = 1 - Math.pow(1 - p, 3);
-    f.mesh.position.lerpVectors(f.start, f.end, eased);
-    f.mesh.position.y += Math.sin(p * Math.PI) * 0.6;
-    f.mesh.rotation.y = p * Math.PI * 2;
-    if (p >= 1) { scene.remove(f.mesh); flyingCards.splice(i, 1); }
-  }
+  try {
+    avatarsBySeat.forEach((entry) => {
+      const animal = entry.group.children[0];
+      if (!animal) return;
+      animal.position.y = 0.02 * Math.sin(t * 0.0018 + entry.bobPhase);
+    });
 
-  revealedCards.forEach((r) => {
-    const p = Math.min(1, Math.max(0, (t - r.t0) / 350));
-    const eased = p < 1 ? 1 - Math.pow(1 - p, 3) : 1;
-    r.mesh.scale.set(eased, eased, eased);
-  });
-
-  if (camAnim) {
-    const p = Math.min(1, (t - camAnim.start) / camAnim.duration);
-    const eased = 1 - Math.pow(1 - p, 3);
-    camera.position.lerpVectors(camAnim.fromPos, camAnim.toPos, eased);
-    controls.target.lerpVectors(camAnim.fromTarget, camAnim.toTarget, eased);
-    camera.lookAt(controls.target);
-    if (p >= 1) {
-      if (camAnim.onDone) camAnim.onDone();
-      controls.syncFromCamera(); // so dragging afterward resumes smoothly instead of snapping
-      camAnim = null;
+    for (let i = flyingCards.length - 1; i >= 0; i--) {
+      const f = flyingCards[i];
+      const p = Math.min(1, (t - f.t0) / f.duration);
+      const eased = 1 - Math.pow(1 - p, 3);
+      f.mesh.position.lerpVectors(f.start, f.end, eased);
+      f.mesh.position.y += Math.sin(p * Math.PI) * 0.6;
+      f.mesh.rotation.y = p * Math.PI * 2;
+      if (p >= 1) { scene.remove(f.mesh); flyingCards.splice(i, 1); }
     }
-  } else {
-    controls.update();
-  }
 
-  renderer.render(scene, camera);
+    revealedCards.forEach((r) => {
+      const p = Math.min(1, Math.max(0, (t - r.t0) / 350));
+      const eased = p < 1 ? 1 - Math.pow(1 - p, 3) : 1;
+      r.mesh.scale.set(eased, eased, eased);
+    });
+
+    if (camAnim) {
+      const p = Math.min(1, (t - camAnim.start) / camAnim.duration);
+      const eased = 1 - Math.pow(1 - p, 3);
+      camera.position.lerpVectors(camAnim.fromPos, camAnim.toPos, eased);
+      controls.target.lerpVectors(camAnim.fromTarget, camAnim.toTarget, eased);
+      camera.lookAt(controls.target);
+      if (p >= 1) {
+        if (camAnim.onDone) camAnim.onDone();
+        controls.syncFromCamera(); // so dragging afterward resumes smoothly instead of snapping
+        camAnim = null;
+      }
+    } else {
+      controls.update();
+    }
+
+    renderer.render(scene, camera);
+  } catch (err) {
+    console.error('Render loop error:', err);
+  }
 }
 
 </script>
