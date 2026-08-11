@@ -16,33 +16,52 @@
   #scene-canvas{ position:fixed; inset:0; display:block; }
   .hidden{ display:none !important; }
 
-  .screen-backdrop{ position:fixed; inset:0; z-index:40; display:flex; align-items:center; justify-content:center; background:radial-gradient(ellipse at 50% 30%, #21160c 0%, #0c0a08 70%); padding:20px; }
-  .card{ width:min(480px,94vw); max-height:92vh; overflow:auto; background:var(--paper); color:var(--ink); border-radius:14px; padding:28px 26px 24px; box-shadow:0 30px 80px var(--shadow); }
-  .brand{ font-family:'Fraunces',serif; font-weight:700; font-size:30px; margin:0 0 2px; }
-  .brand-sub{ font-size:13px; color:#6b6055; margin:0 0 18px; line-height:1.5; }
+  .screen-backdrop{
+    position:fixed; inset:0; z-index:40; display:flex; align-items:center; justify-content:center;
+    background:radial-gradient(ellipse at 50% 30%, #21160c 0%, #0c0a08 70%); padding:20px;
+  }
+  .card{
+    width:min(480px,94vw); max-height:92vh; overflow:auto; background:var(--paper); color:var(--ink);
+    border-radius:14px; padding:28px 26px 24px; box-shadow:0 30px 80px var(--shadow); border:1px solid rgba(0,0,0,0.08);
+  }
+  .brand{ font-family:'Fraunces',serif; font-weight:700; font-size:32px; letter-spacing:-0.01em; margin:0 0 2px; }
+  .brand-sub{ font-size:13px; color:#6b6055; margin:0 0 20px; }
   .field-label{ font-size:12px; text-transform:uppercase; letter-spacing:0.08em; color:#8a7d6d; font-weight:600; margin:16px 0 6px; }
-  input[type=text],select{ width:100%; padding:10px 12px; border-radius:8px; border:1.5px solid #ddd3c2; background:#fffdf9; font-family:'Inter',sans-serif; font-size:14.5px; color:var(--ink); }
+  input[type=text],select{
+    width:100%; padding:10px 12px; border-radius:8px; border:1.5px solid #ddd3c2;
+    background:#fffdf9; font-family:'Inter',sans-serif; font-size:14.5px; color:var(--ink);
+  }
   input[type=text]:focus,select:focus{ outline:none; border-color:var(--brass); }
-  .btn{ display:block; width:100%; text-align:center; padding:13px; border-radius:9px; border:none; font-weight:700; font-size:14.5px; cursor:pointer; margin-top:16px; }
+  .btn{
+    display:block; width:100%; text-align:center; padding:13px; border-radius:9px; border:none;
+    font-weight:700; font-size:14.5px; letter-spacing:0.01em; cursor:pointer; margin-top:16px;
+    transition:filter .12s ease, transform .08s ease;
+  }
+  .btn:active{ transform:translateY(1px); }
   .btn:disabled{ opacity:0.45; cursor:default; }
   .btn-primary{ background:var(--slam); color:#fff8f2; }
+  .btn-primary:hover{ filter:brightness(1.08); }
   .btn-ghost{ background:transparent; color:var(--ink); border:1.5px solid #ddd3c2; }
-  .btn-small{ padding:9px 14px; font-size:12.5px; margin-top:0; width:auto; }
   .err-line{ color:var(--slam); font-size:12.5px; margin-top:8px; min-height:14px; }
-  .mode-tabs{ display:flex; gap:6px; margin-bottom:18px; background:#eee5d5; padding:4px; border-radius:10px; }
-  .mode-tab{ flex:1; text-align:center; padding:9px 0; border-radius:7px; font-weight:600; font-size:13px; cursor:pointer; color:#8a7d6d; }
-  .mode-tab.active{ background:var(--paper); color:var(--ink); box-shadow:0 1px 3px rgba(0,0,0,0.12); }
-  .avatar-grid{ display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin-top:6px; }
-  .avatar-opt{ aspect-ratio:1; border-radius:10px; border:2px solid #e6dcc9; background:#fffdf9; font-size:22px; display:flex; align-items:center; justify-content:center; cursor:pointer; }
-  .avatar-opt.selected{ border-color:var(--brass); background:#fff3de; }
-  .share-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
-  .share-btn{ flex:1; min-width:90px; padding:10px; border-radius:8px; border:1.5px solid #ddd3c2; background:#fffdf9; font-size:12.5px; font-weight:600; cursor:pointer; text-align:center; color:var(--ink); text-decoration:none; }
-  .invite-link-box{ font-family:'IBM Plex Mono',monospace; font-size:12px; background:#fffdf9; border:1.5px solid #ddd3c2; border-radius:8px; padding:10px; word-break:break-all; margin-top:8px; }
-  .room-code-display{ font-family:'IBM Plex Mono',monospace; font-size:28px; font-weight:700; letter-spacing:0.12em; background:#fff3de; border:1.5px solid var(--brass); border-radius:10px; padding:14px; text-align:center; color:var(--ink); margin-top:6px; }
-  .roster-line{ font-size:13px; padding:4px 0; }
 
+  .seat-row{ display:flex; flex-direction:column; gap:8px; padding:12px 0; border-bottom:1px solid #eee3d0; }
+  .seat-row:last-child{ border-bottom:none; }
+  .seat-row-header{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .avatar-pick{ display:flex; gap:4px; flex-wrap:wrap; }
+  .avatar-pick span{
+    width:27px; height:27px; border-radius:8px; border:2px solid #e6dcc9; display:flex;
+    align-items:center; justify-content:center; font-size:14px; cursor:pointer; background:#fffdf9;
+  }
+  .avatar-pick span.sel{ border-color:var(--brass); background:#fff3de; }
+  .seat-row input[type=text]{ width:100%; }
+  .mode-toggle{ display:inline-flex; border-radius:7px; overflow:hidden; border:1.5px solid #ddd3c2; flex-shrink:0; }
+  .mode-toggle div{ padding:8px 14px; font-size:11.5px; font-weight:700; cursor:pointer; color:#8a7d6d; }
+  .mode-toggle div.active{ background:var(--felt); color:var(--paper); }
+  .seat-remove{ cursor:pointer; color:#b0a494; font-size:20px; padding:0 4px; flex-shrink:0; line-height:1; }
+
+  /* ---- HUD ---- */
   #hud{ position:fixed; inset:0; z-index:20; pointer-events:none; display:flex; flex-direction:column; justify-content:space-between; }
-  #topbar{ pointer-events:auto; display:flex; align-items:center; justify-content:space-between; padding:14px 20px; background:linear-gradient(to bottom, rgba(12,10,8,0.75), transparent); flex-wrap:wrap; gap:8px; }
+  #topbar{ pointer-events:auto; display:flex; align-items:center; justify-content:space-between; padding:14px 20px; background:linear-gradient(to bottom, rgba(12,10,8,0.75), transparent); }
   .room-chip{ font-family:'IBM Plex Mono',monospace; font-size:12.5px; background:rgba(0,0,0,0.35); border:1px solid rgba(232,163,61,0.4); color:var(--brass); padding:6px 12px; border-radius:20px; }
   .status-text{ font-size:12.5px; color:#d8cdbb; font-weight:500; }
   .icon-btn{ background:rgba(20,17,13,0.65); border:1px solid rgba(255,255,255,0.12); color:var(--paper); padding:8px 14px; border-radius:8px; font-size:12.5px; font-weight:600; cursor:pointer; }
@@ -51,7 +70,13 @@
 
   #hand-tray{ pointer-events:auto; display:flex; flex-direction:column; align-items:center; gap:10px; padding:14px 16px 20px; background:linear-gradient(to top, rgba(12,10,8,0.85), transparent); }
   #hand-row{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
-  .paper-card{ width:74px; height:100px; background:var(--paper); border-radius:8px; box-shadow:0 8px 18px var(--shadow), inset 0 0 0 1px rgba(0,0,0,0.06); display:flex; align-items:center; justify-content:center; text-align:center; font-family:'Fraunces',serif; font-weight:600; font-size:13.5px; color:var(--ink); padding:8px; cursor:pointer; transition:transform .12s ease; }
+  .paper-card{
+    width:74px; height:100px; background:var(--paper); border-radius:8px;
+    box-shadow:0 8px 18px var(--shadow), inset 0 0 0 1px rgba(0,0,0,0.06);
+    display:flex; align-items:center; justify-content:center; text-align:center;
+    font-family:'Fraunces',serif; font-weight:600; font-size:13.5px; color:var(--ink);
+    padding:8px; cursor:pointer; transition:transform .12s ease;
+  }
   .paper-card:hover{ transform:translateY(-8px); }
   .paper-card.selected{ outline:3px solid var(--brass); transform:translateY(-8px); }
   #hand-actions{ display:flex; gap:10px; }
@@ -60,6 +85,18 @@
   #slam-btn{ background:var(--slam); color:#fff8f2; border:none; padding:11px 26px; border-radius:24px; font-weight:700; font-size:14px; cursor:pointer; box-shadow:0 6px 20px rgba(193,68,60,0.45); }
   #slam-btn:disabled{ background:#5a4c46; box-shadow:none; opacity:0.5; }
   #hand-hint{ font-size:12px; color:#c9bda9; text-align:center; max-width:360px; }
+
+  /* ---- handoff gate ---- */
+  #handoff-screen{ z-index:45; }
+  #close-confirm-modal{ z-index:48; }
+  .handoff-emoji{ font-size:56px; text-align:center; margin-bottom:6px; }
+  .handoff-name{ font-family:'Fraunces',serif; font-weight:700; font-size:26px; text-align:center; margin:0 0 6px; }
+  .handoff-hint{ font-size:13px; color:#6b6055; text-align:center; margin:0 0 4px; }
+
+  /* ---- reaction race ---- */
+  .race-bar-track{ height:10px; background:#eae0cd; border-radius:6px; overflow:hidden; margin:16px 0; }
+  .race-bar-fill{ height:100%; background:var(--slam); width:100%; transition:width .1s linear; }
+  .race-order{ font-size:13px; color:#6b6055; margin-top:4px; }
 
   .rank-row{ display:flex; align-items:center; justify-content:space-between; padding:9px 0; border-bottom:1px solid #eae0cd; font-size:14px; }
   .rank-row:last-child{ border-bottom:none; }
@@ -76,91 +113,59 @@
 
 <canvas id="scene-canvas"></canvas>
 
-<!-- ============ LANDING ============ -->
-<div id="landing-screen" class="screen-backdrop">
+<!-- ============ SETUP ============ -->
+<div id="setup-screen" class="screen-backdrop">
   <div class="card">
     <p class="brand">SET'Da</p>
-    <p class="brand-sub">Real cross-device multiplayer — no server involved, ever. Your device (if hosting) is the table.</p>
-    <p class="brand-sub" style="background:#fff3de; padding:8px 10px; border-radius:8px; color:#8a5a13;">⚠️ Open this file directly in your browser (not inside a chat's built-in preview) — sandboxed previews block the connection this needs.</p>
+    <p class="brand-sub">Pass what you don't need. Slam when you've got four. This runs entirely on one device — pass it around the table, and fill empty seats with bots if you're playing solo.</p>
 
-    <div class="mode-tabs">
-      <div class="mode-tab active" id="tab-create">Host a game</div>
-      <div class="mode-tab" id="tab-join">Join a game</div>
+    <div class="field-label">Players (4–10)</div>
+    <div id="seat-list"></div>
+    <div style="display:flex; gap:8px; margin-top:10px;">
+      <button class="btn btn-ghost" id="btn-add-seat" style="margin-top:0;">+ Add player</button>
+      <button class="btn btn-ghost" id="btn-remove-seat" style="margin-top:0;">– Remove last</button>
     </div>
 
-    <div class="field-label">Your name</div>
-    <input type="text" id="input-name" maxlength="20" placeholder="Enter Your Name" />
-
-    <div id="join-code-wrap" class="hidden">
-      <div class="field-label">Room code</div>
-      <input type="text" id="input-roomcode" maxlength="16" placeholder="from the invite link" />
-    </div>
-
-    <div id="create-count-wrap">
-      <div class="field-label">How many players (4–10)?</div>
-      <input type="text" id="input-playercount" value="4" maxlength="2" />
-    </div>
-
-    <div class="field-label">Pick your avatar</div>
-    <div class="avatar-grid" id="avatar-grid"></div>
-
-    <div class="field-label">🎭 Fake Slam catchphrase (optional, just for fun)</div>
-    <input type="text" id="input-fakeslam" maxlength="60" placeholder='Default: "matniya da bambaraka mandaya"' />
-
-    <button class="btn btn-primary" id="btn-go">Create room</button>
-    <div class="err-line" id="landing-err"></div>
+    <button class="btn btn-primary" id="btn-start-setup">Next: name the sets</button>
+    <div class="err-line" id="setup-err"></div>
   </div>
 </div>
 
-<!-- ============ INVITE (host only, right after creating) ============ -->
-<div id="invite-screen" class="screen-backdrop hidden">
-  <div class="card">
-    <p class="brand" style="font-size:24px;">Invite your table</p>
-    <p class="brand-sub">Share the link, or just read out the room code — whatever's easiest.</p>
-
-    <div class="field-label">Room code</div>
-    <div class="room-code-display" id="invite-code-text"></div>
-    <div class="share-row">
-      <button class="share-btn" id="btn-copy-code">📋 Copy code</button>
-    </div>
-
-    <div class="field-label" style="margin-top:18px;">Or share the full link</div>
-    <div class="invite-link-box" id="invite-link-text"></div>
-    <div class="share-row">
-      <button class="share-btn" id="btn-copy-link">📋 Copy link</button>
-      <a class="share-btn" id="link-whatsapp" target="_blank">WhatsApp</a>
-      <a class="share-btn" id="link-sms">SMS</a>
-      <a class="share-btn" id="link-email">Email</a>
-      <button class="share-btn" id="btn-native-share">Share…</button>
-    </div>
-    <div class="field-label" style="margin-top:20px;">Who's joined</div>
-    <div id="invite-roster"></div>
-    <button class="btn btn-primary" id="btn-invite-continue">Continue to the table</button>
-  </div>
-</div>
-
-<!-- ============ ADMIN NAME SETUP ============ -->
+<!-- ============ NAME SETUP ============ -->
 <div id="name-setup-screen" class="screen-backdrop hidden">
   <div class="card">
-    <p class="brand" style="font-size:24px;">Name the sets</p>
+    <p class="brand" style="font-size:26px;">Name the sets</p>
     <p class="brand-sub">One label per player — each gets copied onto 4 sheets and shuffled into the deck.</p>
     <div id="name-setup-list"></div>
     <button class="btn btn-primary" id="btn-save-names">Shuffle the deck</button>
+    <button class="btn btn-ghost" id="btn-back-to-setup">Back</button>
     <div class="err-line" id="name-setup-err"></div>
   </div>
 </div>
 
-<!-- ============ WAITING (non-host, pre-start) ============ -->
-<div id="waiting-screen" class="screen-backdrop hidden">
+<!-- ============ HANDOFF GATE ============ -->
+<div id="handoff-screen" class="screen-backdrop hidden">
   <div class="card">
-    <p class="brand" style="font-size:22px;">At the table</p>
-    <p class="brand-sub" id="waiting-text"></p>
-    <div id="waiting-roster"></div>
+    <div class="handoff-emoji" id="handoff-emoji"></div>
+    <p class="handoff-name" id="handoff-name"></p>
+    <p class="handoff-hint" id="handoff-hint">Pass the device to this player. Everyone else, look away!</p>
+    <button class="btn btn-primary" id="btn-handoff-ready">I'm ready — show my hand</button>
+  </div>
+</div>
+
+<!-- ============ REACTION RACE ============ -->
+<div id="race-screen" class="screen-backdrop hidden">
+  <div class="card">
+    <p class="brand" style="font-size:24px;" id="race-title">Set!</p>
+    <p class="brand-sub" id="race-sub"></p>
+    <div class="race-bar-track"><div class="race-bar-fill" id="race-bar"></div></div>
+    <div class="race-order" id="race-order"></div>
+    <button class="btn btn-primary" id="btn-race-slam">Slam!</button>
   </div>
 </div>
 
 <!-- ============ ROUND RESULT ============ -->
-<div id="round-result-screen" class="screen-backdrop hidden">
+<div id="round-result-modal" class="screen-backdrop hidden">
   <div class="card">
     <p class="brand" style="font-size:24px;" id="rr-title">Round complete</p>
     <div id="rr-rankings"></div>
@@ -169,45 +174,40 @@
 </div>
 
 <!-- ============ GAME OVER ============ -->
-<div id="game-over-screen" class="screen-backdrop hidden">
+<div id="game-over-modal" class="screen-backdrop hidden">
   <div class="card">
     <p class="brand" style="font-size:24px;">Final scores</p>
     <div class="winner-banner" id="go-winner-banner"></div>
     <div id="go-rankings"></div>
+    <button class="btn btn-ghost" id="btn-new-game">Set up a new game</button>
   </div>
 </div>
 
-<!-- ============ FAKE SLAM (just for fun, no effect on real scores) ============ -->
-<div id="fakeslam-offer-screen" class="screen-backdrop hidden" style="z-index:46;">
+<!-- ============ FAKE SLAM (just for fun, no real effect on scores) ============ -->
+<div id="fake-slam-offer" class="screen-backdrop hidden">
   <div class="card" style="text-align:center;">
     <p class="brand" style="font-size:22px;">Card passed!</p>
     <p class="brand-sub">Feeling mischievous?</p>
-    <button class="btn btn-primary" id="btn-fakeslam-trigger">🎭 Fake Slam (just for fun)</button>
-    <button class="btn btn-ghost" id="btn-fakeslam-skip">Continue</button>
+    <button class="btn btn-primary" id="btn-fake-slam-trigger">🎭 Fake Slam (just for fun)</button>
+    <button class="btn btn-ghost" id="btn-fake-slam-skip">Continue</button>
   </div>
 </div>
 
-<div id="fakeslam-prompt-screen" class="screen-backdrop hidden" style="z-index:46;">
+<div id="fake-slam-screen" class="screen-backdrop hidden">
   <div class="card" style="text-align:center;">
-    <p class="brand" style="font-size:22px;" id="fakeslam-prompt-title">🎭 Set?!</p>
-    <p class="brand-sub">Quick — slam before someone else does!</p>
-    <button class="btn btn-primary" id="btn-fakeslam-react" style="font-size:18px; padding:18px;">SLAM!</button>
+    <p class="brand" style="font-size:22px;" id="fake-slam-title">🎭 Set?!</p>
+    <p class="brand-sub" id="fake-slam-sub">Everyone else — pass the device and slam quick!</p>
+    <button class="btn btn-primary" id="btn-fake-slam-react" style="font-size:18px; padding:18px;">SLAM!</button>
+    <div id="fake-slam-punchline" class="hidden" style="margin:16px 0 4px; font-family:'Fraunces',serif; font-weight:700; font-size:22px; color:var(--slam);"></div>
+    <button class="btn btn-ghost hidden" id="btn-fake-slam-continue">Continue playing</button>
   </div>
 </div>
 
-<div id="fakeslam-reveal-screen" class="screen-backdrop hidden" style="z-index:46;">
-  <div class="card" style="text-align:center;">
-    <p class="brand" style="font-size:20px;">Gotcha!</p>
-    <div style="margin:16px 0; font-family:'Fraunces',serif; font-weight:700; font-size:22px; color:var(--slam);" id="fakeslam-reveal-text"></div>
-    <button class="btn btn-ghost" id="btn-fakeslam-continue">Continue playing</button>
-  </div>
-</div>
-
-<!-- ============ CLOSE CONFIRM (host only) ============ -->
-<div id="close-confirm-screen" class="screen-backdrop hidden" style="z-index:48;">
+<!-- ============ CLOSE CONFIRM ============ -->
+<div id="close-confirm-modal" class="screen-backdrop hidden">
   <div class="card">
     <p class="brand" style="font-size:22px;">End the game?</p>
-    <p class="brand-sub">Shows the final scoreboard for everyone.</p>
+    <p class="brand-sub">This shows the final scoreboard and can't be undone.</p>
     <div style="display:flex; gap:10px;">
       <button class="btn btn-ghost" id="btn-close-cancel" style="margin-top:0;">Keep playing</button>
       <button class="btn btn-primary" id="btn-close-confirm" style="margin-top:0;">End &amp; show scores</button>
@@ -218,13 +218,11 @@
 <!-- ============ HUD ============ -->
 <div id="hud" class="hidden">
   <div id="topbar">
-    <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-      <div class="room-chip" id="room-chip">— — — — — —</div>
+    <div style="display:flex; align-items:center; gap:12px;">
+      <div class="room-chip" id="round-chip">Round —</div>
       <div class="status-text" id="status-text"></div>
     </div>
-    <div style="display:flex; gap:8px;">
-      <button class="icon-btn hidden danger" id="btn-close-game">Close game</button>
-    </div>
+    <button class="icon-btn danger" id="btn-close-game">Close game</button>
   </div>
 
   <div id="hand-tray" class="hidden">
@@ -240,38 +238,36 @@
 <div id="toast"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.2/peerjs.min.js"></script>
 <script>
+/* THREE is loaded globally via a plain <script> tag (see index.html) — no ES module
+   import here, since import-maps pointing at third-party module CDNs are unreliable
+   in sandboxed/offline preview contexts. r128 doesn't ship OrbitControls, so a small
+   custom orbit implementation is included below instead of the addons/ import. */
+
 /* =========================================================================
-   SET'Da -- pure client-side, peer-to-peer, no server of any kind.
+   This build runs entirely on one device -- there's no server. "Multiplayer"
+   here means pass-and-play (hand the device to whoever's turn it is) with
+   optional bot-controlled seats for solo testing. For real cross-device
+   multiplayer, see the Spring Boot + WebSocket backend delivered earlier --
+   that one keeps hands genuinely private across separate devices; nothing
+   running purely in a browser tab can do that without a server, since any
+   shared state visible to one device is visible to all of them.
 
-   ARCHITECTURE: the player who creates the room is the HOST. Their browser
-   runs the one and only authoritative GameEngine + HostService (below) --
-   functionally a "server," just living in one player's tab instead of on
-   infrastructure you'd run. Every other player's browser is a thin client:
-   it sends action requests to the host over a WebRTC DataConnection and
-   renders whatever the host tells it. Hands stay private because the host
-   only ever sends each seat ITS OWN hand privately -- never in a broadcast.
-
-   Trust model, stated plainly: the host's own browser process does hold
-   everyone's cards in memory (it has to, to run the game), even though the
-   UI never displays them. A technically sophisticated host could open
-   devtools and look. This is the unavoidable tradeoff of "no server" -- it's
-   the same trust a physical dealer already has in the real game. If that's
-   ever not acceptable, that's exactly what the earlier Spring Boot backend
-   build is for (a neutral third party neither side controls).
-
-   Voice chat is a separate, full-mesh set of WebRTC connections (everyone to
-   everyone), layered on top using the same peer IDs the roster already
-   gives us -- see the VOICE section.
+   Game rule note: this build uses a single-token relay (only one card moves
+   around the table at a time, starting from whoever jolted) rather than the
+   backend's concurrent-passing model. That's a deliberate simplification --
+   pass-and-play on one screen already serializes every action anyway, so the
+   extra concurrency the backend needs for fairness across real devices isn't
+   needed here, and the simple relay matches the original spec's wording most
+   directly ("who jolt 1st need to pass... if the next player gets it...").
    ========================================================================= */
 
-const $ = (id) => document.getElementById(id);
-
-let state = {
-  roomCode: null, mySeatId: null, isAdmin: false, status: 'LOBBY',
-  roundNumber: 0, expectedPlayerCount: 4, players: [], hand: [], mustAct: false,
-};
+const AVATAR_TYPES = ['fox', 'bear', 'owl', 'rabbit', 'panda', 'tiger', 'wolf', 'deer', 'koala', 'lion'];
+const AVATAR_EMOJI = { fox:'\u{1F98A}', bear:'\u{1F43B}', owl:'\u{1F989}', rabbit:'\u{1F430}', panda:'\u{1F43C}', tiger:'\u{1F42F}', wolf:'\u{1F43A}', deer:'\u{1F98C}', koala:'\u{1F428}', lion:'\u{1F981}' };
+const REACTION_WINDOW_MS = 8000;
+const MIN_PLAYERS = 4;  // need >=4 distinct labels to guarantee every starting hand has 4 different names
+const MAX_PLAYERS = 10;
+const DEFAULT_FAKE_SLAM_PHRASE = 'matniya da bambaraka mandaya';
 
 function uid() { return Math.random().toString(36).slice(2) + Date.now().toString(36); }
 function shuffle(arr) {
@@ -282,13 +278,10 @@ function shuffle(arr) {
 }
 function escapeHtml(s) { return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
-const REACTION_WINDOW_MS = 8000;
-const MIN_PLAYERS = 4;
-const MAX_PLAYERS = 10;
-const AVATAR_TYPES = ['fox', 'bear', 'owl', 'rabbit', 'panda', 'tiger', 'wolf', 'deer', 'koala', 'lion'];
-const AVATAR_EMOJI = { fox:'\u{1F98A}', bear:'\u{1F43B}', owl:'\u{1F989}', rabbit:'\u{1F430}', panda:'\u{1F43C}', tiger:'\u{1F42F}', wolf:'\u{1F43A}', deer:'\u{1F98C}', koala:'\u{1F428}', lion:'\u{1F981}' };
-const DEFAULT_FAKE_SLAM_PHRASE = 'matniya da bambaraka mandaya';
-
+/* =========================================================================
+   GAME ENGINE -- pure logic, unit-tested in isolation before being wired to
+   the UI below. Single source of truth for the whole local session.
+   ========================================================================= */
 class GameEngine {
   constructor(seats) {
     this.seats = seats.map(s => ({ ...s, hand: [], totalScore: 0, roundsWon: 0 }));
@@ -427,659 +420,247 @@ class GameEngine {
   }
 }
 
-/** Simple heuristic bot: slam if possible (and allowed), otherwise pass away a card
- *  from the smallest label-group in hand (keep working toward the biggest group). */
+/* =========================================================================
+   BOT AI -- simple heuristic: slam if possible, otherwise pass away a card
+   from your smallest label-group (keep working toward your biggest group).
+   ========================================================================= */
 function botChooseCard(hand) {
   const counts = {};
-  hand.forEach((c) => counts[c.label] = (counts[c.label] || 0) + 1);
+  hand.forEach(c => counts[c.label] = (counts[c.label] || 0) + 1);
   let worstLabel = null, worstCount = Infinity;
   Object.entries(counts).forEach(([label, count]) => {
     if (count < worstCount) { worstCount = count; worstLabel = label; }
   });
-  const candidates = hand.filter((c) => c.label === worstLabel);
+  const candidates = hand.filter(c => c.label === worstLabel);
   return candidates[Math.floor(Math.random() * candidates.length)];
 }
 
 /* =========================================================================
-   HOST SERVICE -- the "server," running only inside the host's own tab.
-   Tested in isolation (message protocol, hand-privacy, turn authorization)
-   before being wired to real PeerJS connections below.
+   DOM / STATE
    ========================================================================= */
-class HostService {
-  constructor(expectedPlayerCount, broadcastFn, sendToFn) {
-    this.expectedPlayerCount = expectedPlayerCount;
-    this.broadcast = broadcastFn; // (msg) => void -- fans out to every connected seat, host's own UI included
-    this.sendTo = sendToFn;       // (seatId, msg) => void -- private to one seat
-    this.engine = null;
-    this.adminSeatId = null;
-    this.closeVotes = new Set();
-    this._reactionTimer = null;
-    this._botTimers = [];
-  }
+const $ = (id) => document.getElementById(id);
+let engine = null;
+let setupSeats = [
+  { id: uid(), name: 'You', avatar: 'fox', isBot: false, fakeSlamPhrase: '' },
+  { id: uid(), name: 'Bear Bot', avatar: 'bear', isBot: true, fakeSlamPhrase: '' },
+  { id: uid(), name: 'Owl Bot', avatar: 'owl', isBot: true, fakeSlamPhrase: '' },
+  { id: uid(), name: 'Rabbit Bot', avatar: 'rabbit', isBot: true, fakeSlamPhrase: '' },
+];
+const botTimers = [];
+let raceTimer = null;
+let raceFinalizing = false;
 
-  createRoom(hostSeatId, hostName, hostAvatar, hostFakeSlamPhrase) {
-    this.adminSeatId = hostSeatId;
-    this.engine = new GameEngine([{ id: hostSeatId, name: hostName, avatar: hostAvatar, isBot: false, fakeSlamPhrase: hostFakeSlamPhrase || '' }]);
-    this.activeFakeSlam = null;
-    this.broadcastLobby();
-  }
-
-  addSeat(seatId, name, avatar, isBot = false, fakeSlamPhrase = '') {
-    if (this.engine.status !== 'LOBBY') throw new Error('This game has already started.');
-    if (this.engine.seats.length >= this.expectedPlayerCount) throw new Error('This game is already full.');
-    if (this.engine.seats.some((s) => s.id === seatId)) throw new Error('Already seated.');
-    this.engine.seats.push({ id: seatId, name, avatar, isBot, fakeSlamPhrase, hand: [], totalScore: 0, roundsWon: 0 });
-    this.broadcastLobby();
-  }
-
-  setNames(requesterId, names) {
-    if (requesterId !== this.adminSeatId) throw new Error('Only the admin can set names.');
-    this.engine.setNames(names);
-    this.broadcastLobby();
-  }
-
-  jolt(requesterId) {
-    const dealer = this.engine.seats[this.engine.dealerIndex];
-    if (requesterId !== dealer.id && requesterId !== this.adminSeatId) {
-      throw new Error('Only the current dealer (or admin) can jolt.');
-    }
-    this.engine.jolt();
-    this.broadcastLobby();
-    this.engine.seats.forEach((s) => this.sendHand(s));
-    this.maybeRunBotTurn();
-  }
-
-  pass(requesterId, cardId) {
-    if (this.engine.currentSeat().id !== requesterId) throw new Error("It's not your turn.");
-    const { fromId, toId } = this.engine.passCard(cardId);
-    this.broadcast({ t: 'pass', fromId, toId });
-    this.sendHand(this.engine.seats.find((s) => s.id === fromId));
-    this.sendHand(this.engine.seats.find((s) => s.id === toId));
-    this.broadcastLobby();
-    this.maybeRunBotTurn();
-  }
-
-  slam(requesterId, discardCardId) {
-    if (this.engine.currentSeat().id !== requesterId) throw new Error("It's not your turn.");
-    const result = this.engine.slam(discardCardId);
-    this.broadcast({ t: 'slam', ...result });
-    this.sendHand(this.engine.seats.find((s) => s.id === result.winnerId));
-    if (result.discardedTo) this.sendHand(this.engine.seats.find((s) => s.id === result.discardedTo));
-    this.broadcastLobby();
-    this.scheduleReactionTimeout();
-    this.maybeRunBotReactions();
-  }
-
-  react(requesterId) {
-    if (this.engine.status !== 'AWAITING_REACTIONS') return;
-    this.engine.react(requesterId);
-    if (this.engine.allReacted()) this.finalizeRound();
-  }
-
-  scheduleReactionTimeout() {
-    clearTimeout(this._reactionTimer);
-    this._reactionTimer = setTimeout(() => {
-      if (this.engine.status === 'AWAITING_REACTIONS') this.finalizeRound();
-    }, REACTION_WINDOW_MS);
-  }
-
-  finalizeRound() {
-    if (this.engine.status !== 'AWAITING_REACTIONS') return;
-    clearTimeout(this._reactionTimer);
-    const rankings = this.engine.finalizeRound();
-    this.broadcast({ t: 'roundResult', roundNumber: this.engine.roundNumber, rankings });
-    this.broadcastLobby();
-  }
-
-  requestClose(requesterId) {
-    if (requesterId !== this.adminSeatId) throw new Error('Only the admin can close the game.');
-    this.closeVotes.clear();
-    this.broadcast({ t: 'closeRequested' });
-  }
-
-  respondClose(requesterId, accept) {
-    if (accept) this.closeVotes.add(requesterId);
-    if (this.closeVotes.size >= this.engine.seats.length) this.closeGame();
-  }
-
-  closeGame() {
-    const ranked = this.engine.closeGame();
-    this.broadcast({ t: 'gameOver', finalScores: ranked.map((p, i) => ({ ...p, finalRank: i + 1 })) });
-  }
-
-  /* ---- Fake Slam: just for fun, no effect on the real game whatsoever.
-   *  The host's only job here is being the relay everyone else's messages
-   *  have to pass through anyway (star topology) -- it doesn't validate
-   *  turns, hands, or anything else for this. ---- */
-  fakeSlam(requesterId) {
-    const seat = this.engine.seats.find((s) => s.id === requesterId);
-    if (!seat) return;
-    this.activeFakeSlam = { phrase: (seat.fakeSlamPhrase || '').trim() || DEFAULT_FAKE_SLAM_PHRASE, triggeredBy: requesterId };
-    this.broadcast({ t: 'fakeSlamPrompt', fromSeatId: requesterId, fromName: seat.name });
-  }
-
-  fakeSlamReact(requesterId) {
-    if (!this.activeFakeSlam) return; // already resolved, or none active -- ignore late reactions
-    const { phrase, triggeredBy } = this.activeFakeSlam;
-    this.activeFakeSlam = null;
-    this.broadcast({ t: 'fakeSlamReveal', phrase, reactedBy: requesterId, triggeredBy });
-  }
-
-  sendHand(seat) {
-    if (!seat) return;
-    this.sendTo(seat.id, { t: 'hand', cards: seat.hand, mustAct: seat.hand.length === 5 });
-  }
-
-  broadcastLobby() {
-    this.broadcast({
-      t: 'lobby',
-      status: this.engine.status,
-      roundNumber: this.engine.roundNumber,
-      expectedPlayerCount: this.expectedPlayerCount,
-      players: this.engine.seats.map((s, i) => ({
-        seatId: s.id, name: s.name, avatar: s.avatar, cardCount: s.hand.length,
-        totalScore: s.totalScore, isAdmin: s.id === this.adminSeatId, isDealer: i === this.engine.dealerIndex,
-      })),
-    });
-  }
-
-  /* ---- bots: the host runs them directly, no network involved ---- */
-  maybeRunBotTurn() {
-    if (this.engine.status !== 'IN_ROUND') return;
-    const seat = this.engine.currentSeat();
-    if (!seat.isBot) return;
-    const timer = setTimeout(() => {
-      const label = this.engine.findCompletedLabel(seat.hand);
-      if (label && this.engine.firstLapComplete) {
-        this.slam(seat.id);
-      } else {
-        const card = botChooseCard(seat.hand);
-        this.pass(seat.id, card.id);
-      }
-    }, 700 + Math.random() * 700);
-    this._botTimers.push(timer);
-  }
-
-  maybeRunBotReactions() {
-    this.engine.seats.forEach((seat) => {
-      if (!seat.isBot || seat.id === this.engine.reaction?.winnerId) return;
-      const delay = 300 + Math.random() * (REACTION_WINDOW_MS - 800);
-      const timer = setTimeout(() => {
-        if (this.engine.status === 'AWAITING_REACTIONS') this.react(seat.id);
-      }, delay);
-      this._botTimers.push(timer);
-    });
-  }
-}
-
-/* =========================================================================
-   NETWORKING -- PeerJS wraps the browser's native WebRTC. The host uses a
-   deterministic peer ID derived from the room code (so an invite link can
-   name it); everyone else uses a random PeerJS-assigned ID and identifies
-   themselves to the host via a join handshake instead.
-   ========================================================================= */
-const RTC_CONFIG = {
-  iceServers: [
-    { urls: 'stun:stun.l.google.com:19302' },
-    // { urls: 'turn:your-turn-host:3478', username: '...', credential: '...' },
-  ],
-};
-
-function sanitizeRoomCode(code) { return (code || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, ''); }
-function hostPeerId(roomCode) { return `setda-${roomCode}-host`; }
-
-/** Waits for the peer to register with the signaling broker, but never hangs forever --
- *  a silent connection failure (broker unreachable, blocked, etc.) surfaces as a clear
- *  error instead of leaving the UI stuck on a loading state with no feedback. */
-function waitForPeerOpen(peer, timeoutMs = 15000) {
-  return new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => {
-      reject(new Error(
-        "Couldn't connect to the network broker after 15s. If you're viewing this inside a chat's " +
-        "built-in preview, that's expected — open this downloaded file directly in your browser instead " +
-        "(some sandboxed previews block this kind of connection outright). Otherwise, check your internet " +
-        "connection and try again."
-      ));
-    }, timeoutMs);
-    peer.on('open', (id) => { clearTimeout(timeout); resolve(id); });
-    peer.on('error', (err) => { clearTimeout(timeout); reject(err); });
-  });
-}
-
-const NET = {
-  peer: null,
-  isHost: false,
-  hostService: null,       // set only if isHost
-  hostConn: null,          // set only if !isHost -- DataConnection to the host
-  connsBySeat: new Map(),  // host only: seatId -> DataConnection
-  myPeerId: null,
-  mySeatId: null,
-  roomCode: null,
-};
-
-async function hostCreateGame(name, avatar, expectedCount, roomCode, fakeSlamPhrase) {
-  NET.isHost = true;
-  NET.roomCode = roomCode;
-  const hpid = hostPeerId(roomCode);
-  const peer = new Peer(hpid, { config: RTC_CONFIG });
-  NET.peer = peer;
-
-  NET.myPeerId = await waitForPeerOpen(peer);
-  NET.mySeatId = NET.myPeerId;
-  state.mySeatId = NET.mySeatId;
-  state.roomCode = roomCode;
-
-  NET.hostService = new HostService(
-    expectedCount,
-    (msg) => { NET.connsBySeat.forEach((conn) => { if (conn.open) conn.send(msg); }); clientHandleMessage(msg); },
-    (seatId, msg) => {
-      if (seatId === NET.mySeatId) { clientHandleMessage(msg); return; }
-      const conn = NET.connsBySeat.get(seatId);
-      if (conn && conn.open) conn.send(msg);
-    }
-  );
-  NET.hostService.createRoom(hpid, name, avatar, fakeSlamPhrase);
-
-  peer.on('connection', (conn) => {
-    conn.on('data', (msg) => hostHandleIncoming(conn, msg));
-    conn.on('close', () => { NET.connsBySeat.delete(conn.peer); });
-  });
-  peer.on('error', (err) => { if (err.type !== 'peer-unavailable') showToast('Connection issue: ' + err.type); });
-}
-
-function hostHandleIncoming(conn, msg) {
-  const seatId = conn.peer;
-  try {
-    switch (msg.t) {
-      case 'join':
-        NET.connsBySeat.set(seatId, conn);
-        NET.hostService.addSeat(seatId, msg.name, msg.avatar, false, msg.fakeSlamPhrase);
-        conn.send({ t: 'joined', seatId });
-        break;
-      case 'jolt': NET.hostService.jolt(seatId); break;
-      case 'pass': NET.hostService.pass(seatId, msg.cardId); break;
-      case 'slam': NET.hostService.slam(seatId, msg.discardCardId); break;
-      case 'react': NET.hostService.react(seatId); break;
-      case 'fakeSlam': NET.hostService.fakeSlam(seatId); break;
-      case 'fakeSlamReact': NET.hostService.fakeSlamReact(seatId); break;
-      case 'closeResponse': NET.hostService.respondClose(seatId, msg.accept); break;
-      default: break;
-    }
-  } catch (err) {
-    if (conn.open) conn.send({ t: 'error', message: err.message });
-  }
-}
-
-async function joinGame(roomCode, name, avatar, fakeSlamPhrase) {
-  NET.isHost = false;
-  NET.roomCode = roomCode;
-  const peer = new Peer({ config: RTC_CONFIG }); // random id -- only the host needs a discoverable one
-  NET.peer = peer;
-
-  NET.myPeerId = await waitForPeerOpen(peer);
-  NET.mySeatId = NET.myPeerId;
-  state.mySeatId = NET.mySeatId;
-  state.roomCode = roomCode;
-
-  const conn = peer.connect(hostPeerId(roomCode), { reliable: true });
-  NET.hostConn = conn;
-
-  await new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => reject(new Error("Couldn't reach that room — check the code and try again.")), 8000);
-    conn.on('open', () => { clearTimeout(timeout); resolve(); });
-    conn.on('error', (err) => { clearTimeout(timeout); reject(err); });
-  });
-
-  conn.on('data', (msg) => clientHandleMessage(msg));
-  conn.on('close', () => showToast('Lost connection to the host.'));
-  conn.send({ t: 'join', name, avatar, fakeSlamPhrase });
-
-}
-
-/** Uniform action-sending entry point the UI calls -- identical whether I'm the host or a client. */
-function sendAction(msg) {
-  if (NET.isHost) {
-    try {
-      switch (msg.t) {
-        case 'jolt': NET.hostService.jolt(NET.mySeatId); break;
-        case 'pass': NET.hostService.pass(NET.mySeatId, msg.cardId); break;
-        case 'slam': NET.hostService.slam(NET.mySeatId, msg.discardCardId); break;
-        case 'react': NET.hostService.react(NET.mySeatId); break;
-        case 'fakeSlam': NET.hostService.fakeSlam(NET.mySeatId); break;
-        case 'fakeSlamReact': NET.hostService.fakeSlamReact(NET.mySeatId); break;
-        case 'closeResponse': NET.hostService.respondClose(NET.mySeatId, msg.accept); break;
-        case 'closeRequest': NET.hostService.requestClose(NET.mySeatId); break;
-        case 'setNames': NET.hostService.setNames(NET.mySeatId, msg.names); break;
-        default: break;
-      }
-    } catch (err) {
-      showToast(err.message);
-    }
-  } else if (NET.hostConn && NET.hostConn.open) {
-    NET.hostConn.send(msg);
-  } else {
-    showToast('Not connected yet — one moment.');
-  }
-}
-
-function clientHandleMessage(msg) {
-  switch (msg.t) {
-    case 'joined': onJoined(msg); break;
-    case 'lobby': onLobby(msg); break;
-    case 'hand': onHand(msg); break;
-    case 'pass': onPassEvent(msg); break;
-    case 'slam': onSlamEvent(msg); break;
-    case 'roundResult': onRoundResult(msg); break;
-    case 'closeRequested': onCloseRequested(); break;
-    case 'gameOver': onGameOver(msg); break;
-    case 'fakeSlamPrompt': onFakeSlamPrompt(msg); break;
-    case 'fakeSlamReveal': onFakeSlamReveal(msg); break;
-    case 'error': showToast(msg.message); break;
-    default: break;
-  }
-}
-
-function onJoined(msg) {
-  if (!msg?.seatId) return;
-  NET.mySeatId = msg.seatId;
-  state.mySeatId = msg.seatId;
-}
-
-/* Voice chat removed by request. */
-function renderVoiceRosterText() {}
-
-/* =========================================================================
-   LANDING SCREEN
-   ========================================================================= */
-let landingMode = 'create';
-let selectedAvatar = 'fox';
-
-function buildAvatarGrid() {
-  const grid = $('avatar-grid');
-  grid.innerHTML = '';
-  AVATAR_TYPES.forEach((type) => {
-    const el = document.createElement('div');
-    el.className = 'avatar-opt' + (type === selectedAvatar ? ' selected' : '');
-    el.textContent = AVATAR_EMOJI[type];
-    el.onclick = () => { selectedAvatar = type; buildAvatarGrid(); };
-    grid.appendChild(el);
-  });
-}
-buildAvatarGrid();
-
-$('tab-create').onclick = () => {
-  landingMode = 'create';
-  $('tab-create').classList.add('active'); $('tab-join').classList.remove('active');
-  $('join-code-wrap').classList.add('hidden'); $('create-count-wrap').classList.remove('hidden');
-  $('btn-go').textContent = 'Create room';
-};
-$('tab-join').onclick = () => {
-  landingMode = 'join';
-  $('tab-join').classList.add('active'); $('tab-create').classList.remove('active');
-  $('join-code-wrap').classList.remove('hidden'); $('create-count-wrap').classList.add('hidden');
-  $('btn-go').textContent = 'Join room';
-};
-
-// Invite-link auto-detect: ?join=CODE pre-fills the join flow so clicking a shared link is one tap.
-(function detectInviteLink() {
-  const params = new URLSearchParams(location.search);
-  const joinCode = params.get('join');
-  if (joinCode) {
-    $('tab-join').click();
-    $('input-roomcode').value = sanitizeRoomCode(joinCode);
-  }
-})();
-
-$('btn-go').onclick = async () => {
-  const err = $('landing-err'); err.textContent = '';
-  const name = $('input-name').value.trim();
-  if (!name) { err.textContent = 'Enter a name first.'; return; }
-  const fakeSlamPhrase = $('input-fakeslam').value.trim();
-
-  try {
-    if (landingMode === 'create') {
-      const count = parseInt($('input-playercount').value, 10);
-      if (!Number.isInteger(count) || count < MIN_PLAYERS || count > MAX_PLAYERS) {
-        err.textContent = `Enter a number of players between ${MIN_PLAYERS} and ${MAX_PLAYERS}.`;
-        return;
-      }
-      const roomCode = Array.from({ length: 6 }, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random() * 32)]).join('');
-      $('btn-go').disabled = true; $('btn-go').textContent = 'Setting up…';
-      state.isAdmin = true;
-      await hostCreateGame(name, selectedAvatar, count, roomCode, fakeSlamPhrase);
-      showInviteScreen(roomCode);
-    } else {
-      const roomCode = sanitizeRoomCode($('input-roomcode').value);
-      if (!roomCode) { err.textContent = 'Enter the room code.'; return; }
-      $('btn-go').disabled = true; $('btn-go').textContent = 'Joining…';
-      await joinGame(roomCode, name, selectedAvatar, fakeSlamPhrase);
-      enterGame();
-    }
-  } catch (e) {
-    err.textContent = e.message || 'Something went wrong — try again.';
-    $('btn-go').disabled = false; $('btn-go').textContent = landingMode === 'create' ? 'Create room' : 'Join room';
-  }
-};
-
-/* =========================================================================
-   INVITE SCREEN (host only)
-   ========================================================================= */
-function showInviteScreen(roomCode) {
-  showScreen('invite-screen');
-  $('invite-code-text').textContent = roomCode;
-  $('btn-copy-code').onclick = async () => {
-    try { await navigator.clipboard.writeText(roomCode); showToast('Room code copied!'); }
-    catch { showToast('Could not copy — select and copy the code manually.'); }
-  };
-  const link = `${location.origin}${location.pathname}?join=${roomCode}`;
-  $('invite-link-text').textContent = link;
-  $('btn-copy-link').onclick = async () => {
-    try { await navigator.clipboard.writeText(link); showToast('Link copied!'); }
-    catch { showToast('Could not copy — select and copy the link manually.'); }
-  };
-  $('link-whatsapp').href = `https://wa.me/?text=${encodeURIComponent(`Join my SET'Da game! ${link}`)}`;
-  $('link-sms').href = `sms:?body=${encodeURIComponent(`Join my SET'Da game! ${link}`)}`;
-  $('link-email').href = `mailto:?subject=${encodeURIComponent("Join my SET'Da game")}&body=${encodeURIComponent(`Join here: ${link}`)}`;
-  const nativeBtn = $('btn-native-share');
-  if (navigator.share) {
-    nativeBtn.classList.remove('hidden');
-    nativeBtn.onclick = () => navigator.share({ title: "SET'Da", text: 'Join my game!', url: link }).catch(() => {});
-  } else {
-    nativeBtn.classList.add('hidden');
-  }
-  $('btn-invite-continue').onclick = () => enterGame();
-}
-
-function renderInviteRoster() {
-  const el = $('invite-roster');
-  if (!el || el.closest('.hidden')) { /* still update even if hidden, cheap */ }
-  el.innerHTML = state.players.map((p) =>
-    `<div class="roster-line">${AVATAR_EMOJI[p.avatar] || ''} ${escapeHtml(p.name)}${p.isAdmin ? ' (host)' : ''}</div>`
-  ).join('') + `<div class="roster-line" style="color:#8a7d6d;">${state.players.length} of ${state.expectedPlayerCount} joined</div>`;
-}
-
-/* =========================================================================
-   SCREEN MANAGEMENT
-   ========================================================================= */
-const SCREEN_IDS = ['landing-screen', 'invite-screen', 'waiting-screen', 'round-result-screen', 'game-over-screen', 'fakeslam-offer-screen', 'fakeslam-prompt-screen', 'fakeslam-reveal-screen'];
+const SCREEN_IDS = ['setup-screen', 'name-setup-screen', 'handoff-screen', 'race-screen', 'round-result-modal', 'game-over-modal', 'fake-slam-offer', 'fake-slam-screen'];
 function hideAllScreens() { SCREEN_IDS.forEach((id) => $(id).classList.add('hidden')); $('hand-tray').classList.add('hidden'); }
 function showScreen(id) { hideAllScreens(); $(id).classList.remove('hidden'); }
 function showHud() { $('hud').classList.remove('hidden'); }
+function queueBot(fn, delay) { botTimers.push(setTimeout(fn, delay)); }
+function clearBotTimers() { botTimers.forEach(clearTimeout); botTimers.length = 0; }
 
 let toastTimer = null;
 function showToast(msg) {
   const t = $('toast'); t.textContent = msg; t.classList.add('show');
-  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+}
+function setStatusText(text) { $('status-text').textContent = text; }
+
+/* =========================================================================
+   SETUP SCREEN
+   ========================================================================= */
+function renderSeatList() {
+  const list = $('seat-list');
+  list.innerHTML = '';
+  setupSeats.forEach((seat, i) => {
+    const row = document.createElement('div');
+    row.className = 'seat-row';
+
+    const header = document.createElement('div');
+    header.className = 'seat-row-header';
+
+    const picker = document.createElement('div');
+    picker.className = 'avatar-pick';
+    AVATAR_TYPES.forEach((type) => {
+      const span = document.createElement('span');
+      span.textContent = AVATAR_EMOJI[type];
+      if (type === seat.avatar) span.classList.add('sel');
+      span.onclick = () => { seat.avatar = type; renderSeatList(); };
+      picker.appendChild(span);
+    });
+    header.appendChild(picker);
+
+    if (setupSeats.length > MIN_PLAYERS && i !== 0) {
+      const remove = document.createElement('span');
+      remove.className = 'seat-remove'; remove.textContent = '\u00d7';
+      remove.onclick = () => { setupSeats.splice(i, 1); renderSeatList(); };
+      header.appendChild(remove);
+    }
+
+    const nameInput = document.createElement('input');
+    nameInput.type = 'text'; nameInput.value = seat.name; nameInput.maxLength = 20;
+    nameInput.placeholder = 'Player name';
+    nameInput.oninput = () => { seat.name = nameInput.value; };
+
+    const modeToggle = document.createElement('div');
+    modeToggle.className = 'mode-toggle';
+    if (i === 0) {
+      modeToggle.innerHTML = `<div class="active" style="cursor:default;">You</div>`;
+    } else {
+      const humanBtn = document.createElement('div'); humanBtn.textContent = 'Human';
+      const botBtn = document.createElement('div'); botBtn.textContent = 'Bot';
+      humanBtn.classList.toggle('active', !seat.isBot);
+      botBtn.classList.toggle('active', seat.isBot);
+      humanBtn.onclick = () => { seat.isBot = false; renderSeatList(); };
+      botBtn.onclick = () => { seat.isBot = true; renderSeatList(); };
+      modeToggle.append(humanBtn, botBtn);
+    }
+
+    const phraseInput = document.createElement('input');
+    phraseInput.type = 'text';
+    phraseInput.value = seat.fakeSlamPhrase || '';
+    phraseInput.maxLength = 60;
+    phraseInput.placeholder = `Fake Slam phrase (default: "${DEFAULT_FAKE_SLAM_PHRASE}")`;
+    phraseInput.oninput = () => { seat.fakeSlamPhrase = phraseInput.value; };
+
+    row.append(header, nameInput, modeToggle, phraseInput);
+    list.appendChild(row);
+  });
 }
 
-function enterGame() {
+$('btn-add-seat').onclick = () => {
+  if (setupSeats.length >= MAX_PLAYERS) return;
+  const n = setupSeats.length;
+  const usedAvatars = new Set(setupSeats.map(s => s.avatar));
+  const nextAvatar = AVATAR_TYPES.find(a => !usedAvatars.has(a)) || AVATAR_TYPES[n % AVATAR_TYPES.length];
+  setupSeats.push({ id: uid(), name: `Bot ${n}`, avatar: nextAvatar, isBot: true, fakeSlamPhrase: '' });
+  renderSeatList();
+};
+$('btn-remove-seat').onclick = () => {
+  if (setupSeats.length <= MIN_PLAYERS) return;
+  setupSeats.pop();
+  renderSeatList();
+};
+
+$('btn-start-setup').onclick = () => {
+  const err = $('setup-err'); err.textContent = '';
+  const names = setupSeats.map(s => s.name.trim());
+  if (names.some(n => !n)) { err.textContent = 'Every seat needs a name.'; return; }
+  if (new Set(names.map(n => n.toLowerCase())).size !== names.length) { err.textContent = 'Player names must be different from each other.'; return; }
+  renderNameSetupList();
+  showScreen('name-setup-screen');
+};
+$('btn-back-to-setup').onclick = () => showScreen('setup-screen');
+
+function renderNameSetupList() {
+  const list = $('name-setup-list');
+  list.innerHTML = '';
+  setupSeats.forEach((seat, i) => {
+    const wrap = document.createElement('div');
+    wrap.innerHTML = `<div class="field-label" style="margin:6px 0 4px;">${AVATAR_EMOJI[seat.avatar]} ${escapeHtml(seat.name)}${seat.isBot ? ' (bot)' : ''}</div>
+      <input type="text" data-idx="${i}" maxlength="24" placeholder="e.g. Apple" />`;
+    list.appendChild(wrap);
+  });
+}
+
+$('btn-save-names').onclick = () => {
+  const err = $('name-setup-err'); err.textContent = '';
+  const inputs = [...document.querySelectorAll('#name-setup-list input')];
+  const names = inputs.map(i => i.value.trim());
+  if (names.some(n => !n)) { err.textContent = 'Every set needs a name.'; return; }
+  if (new Set(names.map(n => n.toLowerCase())).size !== names.length) { err.textContent = 'Set names must all be different.'; return; }
+
+  engine = new GameEngine(setupSeats.map(s => ({ id: s.id, name: s.name, avatar: s.avatar, isBot: s.isBot, fakeSlamPhrase: s.fakeSlamPhrase })));
+  engine.setNames(names);
+
   showHud();
   initScene();
-  if (!sceneReady) initScene();
   renderTable();
-  if (state.isAdmin) maybeAutoPrepareRound();
-  maybeShowWaiting();
+  presentTurn();
+};
+
+/* =========================================================================
+   HANDOFF GATE
+   ========================================================================= */
+function showHandoff({ emoji, name, hint, buttonLabel, onReady }) {
+  $('handoff-emoji').textContent = emoji;
+  $('handoff-name').textContent = name;
+  $('handoff-hint').textContent = hint;
+  $('btn-handoff-ready').textContent = buttonLabel;
+  $('btn-handoff-ready').onclick = () => { onReady(); };
+  showScreen('handoff-screen');
 }
 
 /* =========================================================================
-   INBOUND MESSAGE HANDLERS (uniform for host's own UI and every remote client)
+   MAIN GAME DRIVER
    ========================================================================= */
-let autoNamesSubmitted = false;
-
-function onLobby(dto) {
-  state.status = dto.status;
-  state.roundNumber = dto.roundNumber;
-  state.expectedPlayerCount = dto.expectedPlayerCount;
-  state.players = dto.players;
-  if (!state.mySeatId) state.mySeatId = NET.mySeatId;
-  if (!state.roomCode) state.roomCode = NET.roomCode;
-  if (!sceneReady) initScene();
+function presentTurn(opts = {}) {
   renderTopbar();
   renderTable();
-  renderInviteRoster();
-  if (state.isAdmin) maybeAutoPrepareRound();
-  maybeShowWaiting();
-}
 
-function onHand(dto) {
-  state.hand = dto.cards;
-  state.mustAct = dto.mustAct;
-  renderHand();
-}
-
-function onPassEvent(dto) { animateCardPass(dto.fromId, dto.toId); }
-
-function onSlamEvent(dto) {
-  showToast(`${state.players.find((p) => p.seatId === dto.winnerId)?.name || 'Someone'} slammed a set of "${dto.label}"!`);
-  if (dto.discardedTo) animateCardPass(dto.winnerId, dto.discardedTo);
-  triggerTopDownReveal(dto);
-  if (dto.winnerId === state.mySeatId) {
-    handTray.classList.remove('hidden');
-    $('hand-hint').textContent = 'You slammed it! Waiting on the rest of the table…';
-    $('pass-btn').classList.add('hidden');
-    $('slam-btn').disabled = true; $('slam-btn').textContent = 'Slammed ✓';
-  } else {
-    showReactPrompt();
-  }
-}
-
-function onRoundResult(dto) {
-  restoreCamera();
-  const list = $('rr-rankings');
-  list.innerHTML = '';
-  dto.rankings.forEach((r) => {
-    const row = document.createElement('div');
-    row.className = 'rank-row';
-    const nm = state.players.find((p) => p.seatId === r.seatId)?.name || r.name || '?';
-    row.innerHTML = `<span class="rank-pos">#${r.rank}</span><span class="rank-name">${escapeHtml(nm)}</span><span class="rank-pts">+${r.points}</span>`;
-    list.appendChild(row);
-  });
-  $('rr-title').textContent = `Round ${dto.roundNumber} complete`;
-  showScreen('round-result-screen');
-}
-$('btn-rr-close').onclick = () => { hideAllScreens(); showHud(); if (state.isAdmin) maybeAutoPrepareRound(); maybeShowWaiting(); };
-
-function onCloseRequested() {
-  if (confirm("The host wants to end the game and show final scores. Accept?")) {
-    sendAction({ t: 'closeResponse', accept: true });
-  } else {
-    sendAction({ t: 'closeResponse', accept: false });
-  }
-}
-
-function onGameOver(dto) {
-  const list = $('go-rankings');
-  list.innerHTML = '';
-  const ranked = [...dto.finalScores].sort((a, b) => a.finalRank - b.finalRank);
-  const winner = ranked[0];
-  $('go-winner-banner').textContent = winner ? `🏆 ${winner.name} wins the table!` : 'Game over';
-  ranked.forEach((p) => {
-    const row = document.createElement('div');
-    row.className = 'rank-row';
-    row.innerHTML = `<span class="rank-pos">#${p.finalRank}</span><span class="rank-name">${AVATAR_EMOJI[p.avatar] || ''} ${escapeHtml(p.name)}</span><span class="rank-pts">${p.totalScore} pts</span>`;
-    list.appendChild(row);
-  });
-  showScreen('game-over-screen');
-}
-
-/* =========================================================================
-   HOST AUTO-SETUP
-   ========================================================================= */
-function buildAutoLabelsFromPlayers(players) {
-  const seen = new Map();
-  return players.map((p, i) => {
-    const base = (p.name || `Player ${i + 1}`).trim().slice(0, 24) || `Player ${i + 1}`;
-    const key = base.toLowerCase();
-    const n = (seen.get(key) || 0) + 1;
-    seen.set(key, n);
-    return n === 1 ? base : `${base} ${n}`;
-  });
-}
-
-function maybeAutoPrepareRound() {
-  if (!state.isAdmin) return;
-  if (state.status !== 'LOBBY') { autoNamesSubmitted = false; return; }
-  if (state.players.length < state.expectedPlayerCount) return;
-  if (autoNamesSubmitted) return;
-  autoNamesSubmitted = true;
-  const names = buildAutoLabelsFromPlayers(state.players);
-  sendAction({ t: 'setNames', names });
-  hideAllScreens();
-  showHud();
-  showToast('All players joined. Host can now jolt & deal.');
-}
-
-/* =========================================================================
-   WAITING SCREEN (shown to non-active players between actions)
-   ========================================================================= */
-function maybeShowWaiting() {
-  if (state.status === 'LOBBY' && !state.isAdmin) {
-    $('waiting-text').textContent = state.players.length < state.expectedPlayerCount
-      ? 'Waiting for more players to join…'
-      : 'All players are in. Waiting for host to start the round…';
-    $('waiting-roster').innerHTML = state.players.map((p) => `${AVATAR_EMOJI[p.avatar] || ''} ${escapeHtml(p.name)}`).join(' &nbsp; ');
-    showScreen('waiting-screen');
-    return;
-  }
-  if (state.status === 'READY_TO_DEAL' || state.status === 'ROUND_COMPLETE') {
-    const me = state.players.find((p) => p.seatId === state.mySeatId);
-    const canDeal = !!(me && me.isDealer) || state.isAdmin;
-    if (canDeal) {
-      hideAllScreens(); showHud();
-      $('hand-tray').classList.remove('hidden');
-      $('hand-row').innerHTML = '';
-      $('pass-btn').classList.add('hidden');
-      const slamBtn = $('slam-btn');
-      slamBtn.classList.remove('hidden');
-      slamBtn.disabled = false;
-      slamBtn.textContent = '🃏 Jolt & deal';
-      slamBtn.onclick = () => sendAction({ t: 'jolt' });
-      $('hand-hint').textContent = "It's your turn to jolt the deck.";
+  if (engine.status === 'READY_TO_DEAL' || engine.status === 'ROUND_COMPLETE') {
+    const dealer = engine.seats[engine.dealerIndex];
+    if (dealer.isBot) {
+      setStatusText(`${dealer.name} is jolting\u2026`);
+      hideAllScreens();
+      queueBot(() => { engine.jolt(); presentTurn(); }, 900);
     } else {
-      $('waiting-text').textContent = 'Waiting for the dealer to jolt and deal…';
-      $('waiting-roster').innerHTML = '';
-      showScreen('waiting-screen');
+      showHandoff({
+        emoji: AVATAR_EMOJI[dealer.avatar], name: dealer.name,
+        hint: "Pass the device here \u2014 it's your turn to jolt (shuffle) and deal a fresh round.",
+        buttonLabel: 'Jolt & deal',
+        // the dealer is about to immediately need to make the opening pass too -- skip
+        // the redundant "show my hand" gate for that very next step, same person, same tap.
+        onReady: () => { engine.jolt(); presentTurn({ skipGateFor: dealer.id }); },
+      });
     }
     return;
   }
-  if (state.status === 'IN_ROUND' && !state.mustAct) {
-    $('waiting-text').textContent = "It's not your turn — hang tight.";
-    $('waiting-roster').innerHTML = '';
-    showScreen('waiting-screen');
+
+  if (engine.status === 'IN_ROUND') {
+    const seat = engine.currentSeat();
+    if (seat.isBot) {
+      hideAllScreens();
+      setStatusText(`${seat.name} is thinking\u2026`);
+      queueBot(() => resolveBotTurn(seat), 650 + Math.random() * 700);
+    } else if (opts.skipGateFor === seat.id) {
+      enterHandTray(seat);
+    } else {
+      showHandoff({
+        emoji: AVATAR_EMOJI[seat.avatar], name: seat.name,
+        hint: seat.hand.length === 5 ? 'A card just came your way \u2014 everyone else, look away!' : "It's your turn \u2014 everyone else, look away!",
+        buttonLabel: 'Show my hand',
+        onReady: () => enterHandTray(seat),
+      });
+    }
+    return;
+  }
+
+  if (engine.status === 'AWAITING_REACTIONS') {
+    runReactionRace();
   }
 }
 
-/* =========================================================================
-   HAND TRAY (select-a-card-then-choose Pass/Slam)
-   ========================================================================= */
-const handTray = $('hand-tray');
+function resolveBotTurn(seat) {
+  const label = engine.findCompletedLabel(seat.hand);
+  if (label && engine.firstLapComplete) {
+    const result = engine.slam();
+    onSlammed(result);
+    return;
+  }
+  const card = botChooseCard(seat.hand);
+  const { fromId, toId } = engine.passCard(card.id);
+  animateCardPass(fromId, toId);
+  setTimeout(presentTurn, 500);
+}
+
+function enterHandTray(seat) {
+  hideAllScreens();
+  showHud();
+  renderHandTray(seat);
+}
+
 let selectedCardId = null;
 
-function handHasCompletedSet(hand) {
-  const counts = {};
-  hand.forEach((c) => counts[c.label] = (counts[c.label] || 0) + 1);
-  return Object.values(counts).some((c) => c >= 4);
-}
+/** Would slamming still work if this specific card were the one set aside? */
 function wouldSlamWork(hand, cardId) {
   const remaining = hand.filter((c) => c.id !== cardId);
   if (remaining.length < 4) return false;
@@ -1088,144 +669,259 @@ function wouldSlamWork(hand, cardId) {
   return Object.values(counts).some((c) => c >= 4);
 }
 
-function renderHand() {
-  if (state.status !== 'IN_ROUND' && state.status !== 'AWAITING_REACTIONS') return;
-  if (!state.mustAct) { maybeShowWaiting(); return; }
-  hideAllScreens(); showHud();
-  handTray.classList.remove('hidden');
-  if (selectedCardId && !state.hand.some((c) => c.id === selectedCardId)) selectedCardId = null;
-  renderHandCards();
-  renderHandActions();
-}
+function renderHandTray(seat) {
+  selectedCardId = null;
+  const directLabel = seat.hand.length === 4 ? engine.findCompletedLabel(seat.hand) : null;
 
-function renderHandCards() {
-  const row = $('hand-row');
-  row.innerHTML = '';
-  state.hand.forEach((card) => {
-    const el = document.createElement('div');
-    el.className = 'paper-card' + (card.id === selectedCardId ? ' selected' : '');
-    el.textContent = card.label;
-    el.onclick = () => {
-      if (state.hand.length === 5) {
-        selectedCardId = (selectedCardId === card.id) ? null : card.id;
-        renderHandCards();
-        renderHandActions();
-      } else {
-        sendAction({ t: 'pass', cardId: card.id });
-        offerFakeSlam();
-      }
+  function renderCards() {
+    const row = $('hand-row');
+    row.innerHTML = '';
+    seat.hand.forEach((card) => {
+      const el = document.createElement('div');
+      el.className = 'paper-card' + (card.id === selectedCardId ? ' selected' : '');
+      el.textContent = card.label;
+      el.onclick = () => {
+        if (seat.hand.length === 5) {
+          selectedCardId = (selectedCardId === card.id) ? null : card.id;
+          renderCards();
+          renderActionRow();
+        } else {
+          // exactly 4 cards -- nothing to set aside, clicking a card just passes it directly
+          const { fromId, toId } = engine.passCard(card.id);
+          animateCardPass(fromId, toId);
+          presentTurn();
+        }
+      };
+      row.appendChild(el);
+    });
+  }
+
+  function renderActionRow() {
+    const passBtn = $('pass-btn');
+    const slamBtn = $('slam-btn');
+    const inGracePeriod = !engine.firstLapComplete;
+
+    if (seat.hand.length === 4) {
+      passBtn.classList.add('hidden');
+      slamBtn.classList.remove('hidden');
+      slamBtn.disabled = !directLabel || inGracePeriod;
+      slamBtn.textContent = 'Slam the set';
+      slamBtn.onclick = () => { const result = engine.slam(); onSlammed(result); };
+      $('hand-hint').textContent = !directLabel
+        ? 'Pick a card to pass to your left.'
+        : inGracePeriod
+          ? "You've got a set, but no one can call Set until the first lap of passing finishes \u2014 pass a card for now."
+          : 'You already have a full set \u2014 slam it!';
+      return;
+    }
+
+    // 5-card hand: must set a card aside first, then choose Pass or Slam
+    passBtn.classList.remove('hidden');
+    slamBtn.classList.remove('hidden');
+
+    if (!selectedCardId) {
+      passBtn.disabled = true;
+      slamBtn.disabled = true;
+      passBtn.textContent = 'Pass';
+      slamBtn.textContent = 'Slam the set';
+      $('hand-hint').textContent = "Tap the card you don't need to set it aside.";
+      return;
+    }
+
+    passBtn.disabled = false;
+    passBtn.textContent = 'Pass this card';
+    passBtn.onclick = () => {
+      const { fromId, toId } = engine.passCard(selectedCardId);
+      animateCardPass(fromId, toId);
+      offerFakeSlam(seat);
     };
-    row.appendChild(el);
-  });
-}
 
-function renderHandActions() {
-  const passBtn = $('pass-btn');
-  const slamBtn = $('slam-btn');
-
-  if (state.hand.length !== 5) {
-    passBtn.classList.add('hidden');
-    const hasSet = handHasCompletedSet(state.hand);
-    slamBtn.disabled = !hasSet;
+    const wouldComplete = wouldSlamWork(seat.hand, selectedCardId);
+    const slamOk = wouldComplete && !inGracePeriod;
+    slamBtn.disabled = !slamOk;
     slamBtn.textContent = 'Slam the set';
-    slamBtn.onclick = () => sendAction({ t: 'slam' });
-    $('hand-hint').textContent = hasSet ? 'You already have a full set — slam it!' : 'Pick a card to pass to your left.';
-    return;
+    slamBtn.onclick = () => { const result = engine.slam(selectedCardId); onSlammed(result); };
+
+    if (!wouldComplete) {
+      $('hand-hint').textContent = "That card belongs to the set you're building \u2014 pass it, or tap a different card instead.";
+    } else if (inGracePeriod) {
+      $('hand-hint').textContent = "That would complete a set, but no one can call Set until the first lap of passing finishes \u2014 pass it on for now.";
+    } else {
+      $('hand-hint').textContent = 'That leaves a full set \u2014 slam it, or just pass the card on.';
+    }
   }
 
-  passBtn.classList.remove('hidden');
-  if (!selectedCardId) {
-    passBtn.disabled = true; slamBtn.disabled = true;
-    passBtn.textContent = 'Pass'; slamBtn.textContent = 'Slam the set';
-    $('hand-hint').textContent = "Tap the card you don't need to set it aside.";
-    return;
-  }
-
-  passBtn.disabled = false;
-  passBtn.textContent = 'Pass this card';
-  passBtn.onclick = () => { sendAction({ t: 'pass', cardId: selectedCardId }); offerFakeSlam(); };
-
-  const wouldComplete = wouldSlamWork(state.hand, selectedCardId);
-  slamBtn.disabled = !wouldComplete;
-  slamBtn.textContent = 'Slam the set';
-  slamBtn.onclick = () => sendAction({ t: 'slam', discardCardId: selectedCardId });
-
-  $('hand-hint').textContent = !wouldComplete
-    ? "That card belongs to the set you're building — pass it, or tap a different card instead."
-    : 'That leaves a full set — slam it, or just pass the card on.';
+  renderCards();
+  renderActionRow();
+  $('hand-tray').classList.remove('hidden');
 }
 
-/* ---- reaction race prompt (after someone else slams) ---- */
 /* =========================================================================
-   FAKE SLAM -- just for fun. Never touches game state, scores, or rounds.
-   The device that just passed offers to prank the table; the prank travels
-   through the host (the only relay available) to every other device, and
-   whoever taps their own "Slam!" first gets the reveal shown back to
-   everyone. Dismissing it just resumes whatever the real game was showing.
+   FAKE SLAM -- just for fun. Doesn't touch engine state, scores, or rounds
+   in any way; purely a prank layer on top of a real pass. Reuses the
+   pass-and-play handoff spirit: the device gets passed around and whoever's
+   holding it can smash the shared "SLAM!" button to end the joke.
    ========================================================================= */
-function offerFakeSlam() {
-  showScreen('fakeslam-offer-screen');
-  $('btn-fakeslam-trigger').onclick = () => {
-    sendAction({ t: 'fakeSlam' });
-    hideAllScreens(); showHud();
-    showToast('Waiting to see who falls for it…');
+function offerFakeSlam(passerSeat) {
+  showScreen('fake-slam-offer');
+  $('btn-fake-slam-trigger').onclick = () => startFakeSlam(passerSeat);
+  $('btn-fake-slam-skip').onclick = () => presentTurn();
+}
+
+function startFakeSlam(passerSeat) {
+  showScreen('fake-slam-screen');
+  $('fake-slam-title').textContent = `\u{1F3AD} ${passerSeat.name} slams the table!`;
+  $('fake-slam-sub').textContent = 'Everyone else \u2014 pass the device and slam quick!';
+  $('fake-slam-punchline').classList.add('hidden');
+  $('fake-slam-punchline').textContent = '';
+  $('btn-fake-slam-continue').classList.add('hidden');
+
+  const reactBtn = $('btn-fake-slam-react');
+  reactBtn.classList.remove('hidden');
+  reactBtn.onclick = () => {
+    reactBtn.classList.add('hidden');
+    const phrase = (passerSeat.fakeSlamPhrase || '').trim() || DEFAULT_FAKE_SLAM_PHRASE;
+    $('fake-slam-punchline').textContent = phrase;
+    $('fake-slam-punchline').classList.remove('hidden');
+    $('btn-fake-slam-continue').classList.remove('hidden');
   };
-  $('btn-fakeslam-skip').onclick = () => { hideAllScreens(); showHud(); resumeRealGameView(); };
-}
 
-function onFakeSlamPrompt(msg) {
-  if (msg.fromSeatId === state.mySeatId) return; // the trigger already saw their own "waiting" toast
-  $('fakeslam-prompt-title').textContent = `🎭 ${escapeHtml(msg.fromName)} slams the table!`;
-  const btn = $('btn-fakeslam-react');
-  btn.disabled = false;
-  btn.onclick = () => { btn.disabled = true; sendAction({ t: 'fakeSlamReact' }); };
-  showScreen('fakeslam-prompt-screen');
-}
-
-function onFakeSlamReveal(msg) {
-  $('fakeslam-reveal-text').textContent = msg.phrase;
-  $('btn-fakeslam-continue').onclick = () => { hideAllScreens(); showHud(); resumeRealGameView(); };
-  showScreen('fakeslam-reveal-screen');
-}
-
-/** After a Fake Slam interlude ends, put the screen back to whatever the real game state calls for. */
-function resumeRealGameView() {
-  if (state.mustAct) renderHand();
-  else maybeShowWaiting();
-}
-
-function showReactPrompt() {
-  hideAllScreens(); showHud();
-  handTray.classList.remove('hidden');
-  $('pass-btn').classList.add('hidden');
-  $('hand-row').innerHTML = '';
-  $('hand-hint').textContent = 'Slam the table too — your speed sets your rank!';
-  const slamBtn = $('slam-btn');
-  slamBtn.disabled = false;
-  slamBtn.textContent = 'Slam!';
-  slamBtn.onclick = () => { sendAction({ t: 'react' }); slamBtn.disabled = true; slamBtn.textContent = 'Slammed ✓'; };
+  $('btn-fake-slam-continue').onclick = () => presentTurn();
 }
 
 /* =========================================================================
-   TOPBAR + CLOSE GAME
+   SLAM + REACTION RACE
+   ========================================================================= */
+function onSlammed(result) {
+  const winner = engine.seats.find(s => s.id === result.winnerId);
+  showToast(`${winner.name} slammed a set of "${result.label}"!`);
+  if (result.discardedTo) animateCardPass(winner.id, result.discardedTo);
+  triggerTopDownReveal(result, winner);
+  renderTable();
+  runReactionRace();
+}
+
+function runReactionRace() {
+  raceFinalizing = false;
+  clearTimeout(raceTimer);
+  const winner = engine.seats.find(s => s.id === engine.reaction.winnerId);
+  $('race-title').textContent = `${winner.name} slammed a set!`;
+  $('race-sub').textContent = 'Everyone else \u2014 slam now! The faster you react, the higher you rank.';
+  showScreen('race-screen');
+
+  const start = Date.now();
+  const total = REACTION_WINDOW_MS;
+  const bar = $('race-bar');
+
+  // bots each pick their own reaction moment within the window
+  engine.seats.forEach((seat) => {
+    if (seat.isBot && seat.id !== winner.id && !engine.reaction.order.includes(seat.id)) {
+      const delay = 300 + Math.random() * (total - 800);
+      queueBot(() => {
+        if (!engine.reaction || engine.reaction.order.includes(seat.id)) return;
+        engine.react(seat.id);
+        updateRaceOrderDisplay();
+        maybeFinalizeRace();
+      }, delay);
+    }
+  });
+
+  $('btn-race-slam').onclick = () => {
+    if (!engine.reaction) return;
+    const nextHuman = engine.seats.find(s => !s.isBot && s.id !== winner.id && !engine.reaction.order.includes(s.id));
+    if (nextHuman) {
+      engine.react(nextHuman.id);
+      updateRaceOrderDisplay();
+      maybeFinalizeRace();
+    }
+  };
+
+  updateRaceOrderDisplay();
+
+  function tick() {
+    if (raceFinalizing) return;
+    const elapsed = Date.now() - start;
+    const pct = Math.max(0, 100 - (elapsed / total) * 100);
+    bar.style.width = pct + '%';
+    if (elapsed >= total || engine.allReacted()) { finalizeRace(); return; }
+    raceTimer = setTimeout(tick, 100);
+  }
+  tick();
+}
+
+function updateRaceOrderDisplay() {
+  if (!engine.reaction) return;
+  const names = engine.reaction.order.map(id => engine.seats.find(s => s.id === id).name);
+  $('race-order').textContent = 'Reacted so far: ' + names.join(' \u2192 ');
+}
+
+function maybeFinalizeRace() {
+  if (engine.allReacted() && !raceFinalizing) finalizeRace();
+}
+
+function finalizeRace() {
+  if (raceFinalizing || !engine.reaction) return;
+  raceFinalizing = true;
+  clearTimeout(raceTimer);
+  const rankings = engine.finalizeRound();
+  showRoundResult(rankings);
+}
+
+function showRoundResult(rankings) {
+  restoreCamera();
+  const list = $('rr-rankings');
+  list.innerHTML = '';
+  rankings.forEach((r) => {
+    const row = document.createElement('div');
+    row.className = 'rank-row';
+    row.innerHTML = `<span class="rank-pos">#${r.rank}</span><span class="rank-name">${AVATAR_EMOJI[r.avatar] || ''} ${escapeHtml(r.name)}</span><span class="rank-pts">+${r.points}</span>`;
+    list.appendChild(row);
+  });
+  $('rr-title').textContent = `Round ${engine.roundNumber} complete`;
+  showScreen('round-result-modal');
+}
+$('btn-rr-close').onclick = () => { presentTurn(); };
+
+/* =========================================================================
+   CLOSE GAME
+   ========================================================================= */
+$('btn-close-game').onclick = () => { if (engine) $('close-confirm-modal').classList.remove('hidden'); };
+$('btn-close-cancel').onclick = () => $('close-confirm-modal').classList.add('hidden');
+$('btn-close-confirm').onclick = () => {
+  $('close-confirm-modal').classList.add('hidden');
+  clearBotTimers();
+  const ranked = engine.closeGame();
+  showGameOver(ranked);
+};
+$('btn-new-game').onclick = () => location.reload();
+
+function showGameOver(ranked) {
+  const list = $('go-rankings');
+  list.innerHTML = '';
+  ranked.forEach((p, i) => {
+    const row = document.createElement('div');
+    row.className = 'rank-row';
+    row.innerHTML = `<span class="rank-pos">#${i + 1}</span><span class="rank-name">${AVATAR_EMOJI[p.avatar] || ''} ${escapeHtml(p.name)}</span><span class="rank-pts">${p.totalScore} pts</span>`;
+    list.appendChild(row);
+  });
+  $('go-winner-banner').textContent = ranked.length ? `\ud83c\udfc6 ${ranked[0].name} wins the table!` : 'Game over';
+  showScreen('game-over-modal');
+}
+
+/* =========================================================================
+   TOPBAR
    ========================================================================= */
 function renderTopbar() {
-  $('room-chip').textContent = state.roomCode || NET.roomCode || '';
+  $('round-chip').textContent = engine.roundNumber > 0 ? `Round ${engine.roundNumber}` : 'Setting up';
   const labels = {
-    LOBBY: 'Waiting for players', READY_TO_DEAL: 'Ready to deal', IN_ROUND: `Round ${state.roundNumber} — in play`,
-    AWAITING_REACTIONS: 'Set! Racing to slam…', ROUND_COMPLETE: 'Round complete', CLOSED: 'Game closed',
+    LOBBY: 'Setting up', READY_TO_DEAL: 'Ready to deal', IN_ROUND: 'In play',
+    AWAITING_REACTIONS: 'Set! Racing to slam\u2026', ROUND_COMPLETE: 'Round complete', CLOSED: 'Game closed',
   };
-  $('status-text').textContent = labels[state.status] || state.status;
-  $('btn-close-game').classList.toggle('hidden', !state.isAdmin || state.status === 'LOBBY');
-  renderVoiceRosterText();
+  setStatusText(labels[engine.status] || engine.status);
 }
 
-$('btn-close-game').onclick = () => { $('close-confirm-screen').classList.remove('hidden'); };
-$('btn-close-cancel').onclick = () => $('close-confirm-screen').classList.add('hidden');
-$('btn-close-confirm').onclick = () => {
-  $('close-confirm-screen').classList.add('hidden');
-  sendAction({ t: 'closeRequest' });
-};
+/* init */
+renderSeatList();
 
 /* =========================================================================
    THREE.JS SCENE -- table viewed from a raised angle under a warm pendant
@@ -1237,7 +933,6 @@ let renderer, scene, camera, controls;
 const seatsGroup = new THREE.Group();
 const avatarsBySeat = new Map();
 const flyingCards = [];
-let sceneInitErrorShown = false;
 
 /** Tiny drag-to-rotate / wheel-to-zoom camera orbit, standing in for the r128-incompatible
  *  OrbitControls addon. Exposes just the surface this file actually uses: .target, .enabled,
@@ -1302,44 +997,34 @@ const TOPDOWN_CAM_TARGET = new THREE.Vector3(0, 0.4, 0);
 
 function initScene() {
   if (sceneReady) return;
+  sceneReady = true;
 
-  try {
-    const canvas = $('scene-canvas');
-    renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setSize(window.innerWidth, window.innerHeight);
+  const canvas = $('scene-canvas');
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
 
-    scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x0c0a08);
-    scene.fog = new THREE.Fog(0x0c0a08, 14, 26);
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0c0a08);
+  scene.fog = new THREE.Fog(0x0c0a08, 14, 26);
 
-    camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 100);
-    camera.position.copy(DEFAULT_CAM_POS);
-    camera.lookAt(DEFAULT_CAM_TARGET);
+  camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 100);
+  camera.position.copy(DEFAULT_CAM_POS);
+  camera.lookAt(DEFAULT_CAM_TARGET);
 
-    controls = new OrbitLite(camera, renderer.domElement);
-    controls.target.copy(DEFAULT_CAM_TARGET);
-    controls.syncFromCamera();
-    controls.update();
+  controls = new OrbitLite(camera, renderer.domElement);
+  controls.target.copy(DEFAULT_CAM_TARGET);
+  controls.syncFromCamera();
+  controls.update();
 
-    scene.add(new THREE.HemisphereLight(0x8a7d6d, 0x1a1410, 0.55));
+  scene.add(new THREE.HemisphereLight(0x8a7d6d, 0x1a1410, 0.55));
 
-    buildTable();
-    buildLamp();
-    scene.add(seatsGroup);
+  buildTable();
+  buildLamp();
+  scene.add(seatsGroup);
 
-    window.addEventListener('resize', onResize);
-    renderer.setAnimationLoop(animate);
-    sceneReady = true;
-    sceneInitErrorShown = false;
-  } catch (err) {
-    sceneReady = false;
-    if (!sceneInitErrorShown) {
-      sceneInitErrorShown = true;
-      showToast('3D table failed to start. Refresh once and rejoin the room.');
-    }
-    console.error('Scene init failed:', err);
-  }
+  window.addEventListener('resize', onResize);
+  renderer.setAnimationLoop(animate);
 }
 
 function onResize() {
@@ -1520,7 +1205,7 @@ function makeNameplateTexture(name, avatar, score, isDealer) {
   ctx.fillStyle = '#241c15';
   ctx.font = '600 30px Inter, sans-serif';
   ctx.textBaseline = 'middle';
-  ctx.fillText(`${AVATAR_EMOJI[avatar] || ''} ${name}`, 16, 34, 236);
+  ctx.fillText(`${AVATAR_EMOJI[avatar] || ''} ${name}`, 16, 34, 268);
   ctx.fillStyle = '#c1443c';
   ctx.font = '600 22px "IBM Plex Mono", monospace';
   ctx.fillText(`${score} pts`, 16, 64);
@@ -1534,22 +1219,16 @@ function seatPosition(index, total, radius) {
 }
 
 function renderTable() {
-  if (!sceneReady) return;
-  const players = state.players;
-  const total = players.length;
-  if (total === 0) return;
+  if (!sceneReady || !engine) return;
+  const seats = engine.seats;
+  const total = seats.length;
 
-  const currentIds = new Set(players.map((p) => p.seatId));
-  for (const [seatId, entry] of avatarsBySeat) {
-    if (!currentIds.has(seatId)) { seatsGroup.remove(entry.group); avatarsBySeat.delete(seatId); }
-  }
-
-  players.forEach((p, i) => {
+  seats.forEach((seat, i) => {
     const { x, z } = seatPosition(i, total, 3.6);
-    let entry = avatarsBySeat.get(p.seatId);
+    let entry = avatarsBySeat.get(seat.id);
     if (!entry) {
       const group = new THREE.Group();
-      group.add(buildAnimal(p.avatar));
+      group.add(buildAnimal(seat.avatar));
 
       const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ transparent: true }));
       sprite.scale.set(1.5, 0.42, 1);
@@ -1563,17 +1242,17 @@ function renderTable() {
       group.lookAt(0, 0, 0);
       seatsGroup.add(group);
       entry = { group, sprite, stack, bobPhase: Math.random() * Math.PI * 2 };
-      avatarsBySeat.set(p.seatId, entry);
+      avatarsBySeat.set(seat.id, entry);
     } else {
       entry.group.position.set(x, 0, z);
       entry.group.lookAt(0, 0, 0);
     }
 
-    entry.sprite.material.map = makeNameplateTexture(p.name, p.avatar, p.totalScore, p.isDealer);
+    entry.sprite.material.map = makeNameplateTexture(seat.name, seat.avatar, seat.totalScore, i === engine.dealerIndex);
     entry.sprite.material.needsUpdate = true;
 
     while (entry.stack.children.length) entry.stack.remove(entry.stack.children[0]);
-    for (let c = 0; c < p.cardCount; c++) {
+    for (let c = 0; c < seat.hand.length; c++) {
       const card = new THREE.Mesh(
         new THREE.BoxGeometry(0.42, 0.02, 0.58),
         new THREE.MeshStandardMaterial({ color: 0xf3eee1, roughness: 0.9 })
@@ -1662,50 +1341,42 @@ function restoreCamera() {
 function animate() {
   const t = performance.now();
 
-  if (!renderer || !scene || !camera || !controls) return;
+  avatarsBySeat.forEach((entry) => {
+    entry.group.children[0].position.y = 0.02 * Math.sin(t * 0.0018 + entry.bobPhase);
+  });
 
-  try {
-    avatarsBySeat.forEach((entry) => {
-      const animal = entry.group.children[0];
-      if (!animal) return;
-      animal.position.y = 0.02 * Math.sin(t * 0.0018 + entry.bobPhase);
-    });
-
-    for (let i = flyingCards.length - 1; i >= 0; i--) {
-      const f = flyingCards[i];
-      const p = Math.min(1, (t - f.t0) / f.duration);
-      const eased = 1 - Math.pow(1 - p, 3);
-      f.mesh.position.lerpVectors(f.start, f.end, eased);
-      f.mesh.position.y += Math.sin(p * Math.PI) * 0.6;
-      f.mesh.rotation.y = p * Math.PI * 2;
-      if (p >= 1) { scene.remove(f.mesh); flyingCards.splice(i, 1); }
-    }
-
-    revealedCards.forEach((r) => {
-      const p = Math.min(1, Math.max(0, (t - r.t0) / 350));
-      const eased = p < 1 ? 1 - Math.pow(1 - p, 3) : 1;
-      r.mesh.scale.set(eased, eased, eased);
-    });
-
-    if (camAnim) {
-      const p = Math.min(1, (t - camAnim.start) / camAnim.duration);
-      const eased = 1 - Math.pow(1 - p, 3);
-      camera.position.lerpVectors(camAnim.fromPos, camAnim.toPos, eased);
-      controls.target.lerpVectors(camAnim.fromTarget, camAnim.toTarget, eased);
-      camera.lookAt(controls.target);
-      if (p >= 1) {
-        if (camAnim.onDone) camAnim.onDone();
-        controls.syncFromCamera(); // so dragging afterward resumes smoothly instead of snapping
-        camAnim = null;
-      }
-    } else {
-      controls.update();
-    }
-
-    renderer.render(scene, camera);
-  } catch (err) {
-    console.error('Render loop error:', err);
+  for (let i = flyingCards.length - 1; i >= 0; i--) {
+    const f = flyingCards[i];
+    const p = Math.min(1, (t - f.t0) / f.duration);
+    const eased = 1 - Math.pow(1 - p, 3);
+    f.mesh.position.lerpVectors(f.start, f.end, eased);
+    f.mesh.position.y += Math.sin(p * Math.PI) * 0.6;
+    f.mesh.rotation.y = p * Math.PI * 2;
+    if (p >= 1) { scene.remove(f.mesh); flyingCards.splice(i, 1); }
   }
+
+  revealedCards.forEach((r) => {
+    const p = Math.min(1, Math.max(0, (t - r.t0) / 350));
+    const eased = p < 1 ? 1 - Math.pow(1 - p, 3) : 1;
+    r.mesh.scale.set(eased, eased, eased);
+  });
+
+  if (camAnim) {
+    const p = Math.min(1, (t - camAnim.start) / camAnim.duration);
+    const eased = 1 - Math.pow(1 - p, 3);
+    camera.position.lerpVectors(camAnim.fromPos, camAnim.toPos, eased);
+    controls.target.lerpVectors(camAnim.fromTarget, camAnim.toTarget, eased);
+    camera.lookAt(controls.target);
+    if (p >= 1) {
+      if (camAnim.onDone) camAnim.onDone();
+      controls.syncFromCamera(); // so dragging afterward resumes smoothly instead of snapping
+      camAnim = null;
+    }
+  } else {
+    controls.update();
+  }
+
+  renderer.render(scene, camera);
 }
 
 </script>
